@@ -1,0 +1,7 @@
+sim
+*.ops
+*.txt
+*.pdf
+*.d
+*.o
+ops.h
