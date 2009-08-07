@@ -5,12 +5,12 @@ my $pattern = qr{
     ^                       # start
     (?:9E)?[[:xdigit:]]{2}  # opcode
     \s+                     # space
-    \d+\n                   # cycles
+    \d+\+?\n                # cycles
     \s*                     # space
     \w+\n                   # mnemonic
     \d+                     # bytes
     \s+                     # space
-    \w+                     # addressing mode
+    \S+                     # addressing mode
     $                       # end
 }xsm;
 

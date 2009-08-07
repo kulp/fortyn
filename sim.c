@@ -4,6 +4,7 @@
  */
 
 #include "hc08.h"
+#include "ops.h"
 
 #include <stdbool.h>
 #include <stdio.h>

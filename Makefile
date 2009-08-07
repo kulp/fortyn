@@ -6,10 +6,11 @@ all: sim
 
 CLEANFILES += sim
 
-# TODO
-CLOBBERFILES += ops.h
+CLEANFILES += ops.h
+
 ops.h: $(HC_MODEL).ops
-	touch $@
+	./make_opcode_table.pl < $< > $@.temp
+	mv $@.temp $@
 
 CLOBBERFILES += $(HC_MODEL).ops
 $(HC_MODEL).ops: $(HC_MODEL).txt
