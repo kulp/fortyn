@@ -28,7 +28,7 @@ my @pages = (
 
 while (<>) {
     chomp;
-    my ($op, $cyc, $mne, $sz, $mode) = split /\|/;
+    my ($op, $sz, $mne, $cyc, $mode) = split /\|/;
 
     my $opcode = (hex $op) & 0xFF;
     my $page_index = 1;
@@ -114,7 +114,7 @@ struct page {
 };
 
 /// \@todo define what the return value of an actor_t means
-typedef int (*actor_t)(hc_state_t *state, struct opinfo *info);
+typedef int (*actor_t)(hc_state_t *state, const struct opinfo *info);
 
 extern const char *opnames[];               ///< string names for each op
 extern int opnames_size;                    ///< how many elements in opnames
@@ -167,7 +167,7 @@ int handle_op_UNHANDLED(hc_state_t *state, struct opinfo *info)
     join "\n",
         map {
             sprintf "#pragma weak handle_op_%-${w0}s = handle_op_UNHANDLED\n" .
-            "int handle_op_%-${w0}s(hc_state_t *state, struct opinfo *info);",
+            "int handle_op_%-${w0}s(hc_state_t *state, const struct opinfo *info);",
                 $_, $_
         } sort(keys %ops)
 ] }

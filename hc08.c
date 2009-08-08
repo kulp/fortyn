@@ -55,10 +55,13 @@ int hc_do_op(hc_state_t *st)
     int page = hc_op_page(st);
     st->offset += pages[page].prebyte_cnt;
 
-    uint16_t pc = st->regs.PC.whole;
+    uint16_t *pc = &st->regs.PC.whole;
 
-    const struct opinfo *info = &opinfos[page][st->mem[pc + st->offset]];
+    const struct opinfo *info = &opinfos[page][st->mem[*pc + st->offset]];
     enum op op = info->type;
+
+    (*pc) += info->bytes;
+    rc = actors[op](st, info);
 
     return rc;
 }
