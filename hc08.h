@@ -6,13 +6,28 @@
 #ifndef HC08_H_
 #define HC08_H_
 
+#include <stdarg.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MEMORY_SIZE (1UL << 16)
 
 #if !defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)
 #   error "Define _BIG_ENDIAN or _LITTLE_ENDIAN"
 #endif
+
+/// "as word pointer"
+#define _WP(X) ((uint16_t*)&(X))
+
+/// do byte swapping for 16-bit words
+#if _BIG_ENDIAN
+#   define WORD(X) *_WP(X)
+#else
+#   define WORD(X) ((*_WP(X) >> 8) & 0xFF) | (*_WP(X) << 8)
+#endif
+
+#define HX(state) (((state).regs.H << 8) | (state).regs.X)
 
 typedef struct hc_state_s {
     enum {
@@ -69,6 +84,15 @@ typedef struct hc_state_s {
 int hc_state_init(hc_state_t *st);
 int hc_do_reset(hc_state_t *st);
 int hc_do_op(hc_state_t *st);
+
+static inline void hc_abort(const char *fmt, ...)
+{
+    va_list vl;
+    va_start(vl, fmt);
+    vfprintf(stderr, fmt, vl);
+    va_end(vl);
+    abort();
+}
 
 #endif
 

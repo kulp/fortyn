@@ -6,7 +6,7 @@ override CFLAGS += -g -std=c99 -W -Wall -pedantic-errors #-Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 all: sim
 
-sim: ops.o hc08.o
+sim: ops.o hc08.o ops_impl.o
 
 CLEANFILES += sim
 

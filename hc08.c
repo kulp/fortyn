@@ -24,9 +24,19 @@ int hc_do_reset(hc_state_t *st)
     st->regs.PC.bytes.PCH = st->mem[0xFFFE];
     st->regs.PC.bytes.PCL = st->mem[0xFFFF];
 
+    st->state = RUNNING;
+
     return rc;
 }
 
+/**
+ * Determine which op page the operation at the current PC belongs to.
+ *
+ * @param st the processor state, which holds the PC and instruction to be
+ * decoded at st->mem[st->regs.PC.whole]
+ *
+ * @return the page number. No error conditions can be reported.
+ */
 int hc_op_page(hc_state_t *st)
 {
     int rc = 0; // default page is zero, the no-prefix page
@@ -59,7 +69,9 @@ int hc_do_op(hc_state_t *st)
 
     const struct opinfo *info = &opinfos[page][st->mem[*pc + st->offset]];
     enum op op = info->type;
+    st->offset++; // account of opcode byte, so offset now points to "args"
 
+    /// @todo if the PC wraps, do we set flags in CCR ?
     (*pc) += info->bytes;
     rc = actors[op](st, info);
 

@@ -119,6 +119,9 @@ typedef int (*actor_t)(hc_state_t *state, const struct opinfo *info);
 extern const char *opnames[];               ///< string names for each op
 extern int opnames_size;                    ///< how many elements in opnames
 
+extern const char *modenames[];             ///< string names for each mode
+extern int modenames_size;                  ///< how many elements in modenames
+
 extern const actor_t actors[];              ///< mapping from ops to executors
 extern int actors_size;                     ///< how many elements in actors
 
@@ -156,6 +159,14 @@ const char *opnames[] = {
 };
 
 int opnames_size = countof(opnames);
+
+const char *modenames[] = {
+#define NAMED(X) [MODE_##X] = #X
+    @{ [ join ",\n    ", map { "NAMED(" . legalize($_) . ")" } sort(keys %modes) ] }
+#undef NAMED
+};
+
+int modenames_size = countof(modenames);
 
 int handle_op_UNHANDLED(hc_state_t *state, struct opinfo *info)
 {
