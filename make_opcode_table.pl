@@ -106,9 +106,20 @@ struct opinfo {
     uint8_t     bytes;  ///< how many bytes in operation
 };
 
-extern int opnames_size;
-extern int pages_size;
-extern int optable_size[];
+struct page {
+    uint8_t index;          ///< which page this is
+    bool    prebyte_cnt;    ///< how many prebytes are required for this page
+    uint8_t prebyte_val[1]; ///< what the prebyte value(s) is / are
+};
+
+extern const char *opnames[];               ///< string names for each op
+extern int opnames_size;                    ///< how many elements in opnames
+
+extern const struct page pages[];           ///< descriptions of op pages
+extern int pages_size;                      ///< how many elements in pages
+
+extern const struct opinfo optable[][256];  ///< detailed op descriptions
+extern int optable_size[];                  ///< how many elements in optable
 
 #endif
 
@@ -137,11 +148,7 @@ const char *opnames[] = {
 
 int opnames_size = countof(opnames);
 
-const struct {
-    uint8_t index;          ///< which page this is
-    bool    prebyte_cnt;    ///< how many prebytes are required for this page
-    uint8_t prebyte_val[1]; ///< what the prebyte value(s) is / are
-} pages[] = {
+const struct page pages[] = {
     @{
         local $" = ", ";
         [

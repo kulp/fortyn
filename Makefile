@@ -35,9 +35,12 @@ clobber: clean
 	-rm -rf $(CLOBBERFILES)
 
 ifneq ($(MAKECMDGOALS),clean)
-include $(CFILES:.c=.d)
+-include $(CFILES:.c=.d)
 endif
 
 %.d: %.c
-	$(CC) -MM -MG -MF $@ $^
+	@set -e; rm -f $@; \
+	$(CC) -MM -MG -MF $@.$$$$ $^; \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
 
