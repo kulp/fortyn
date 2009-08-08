@@ -1,8 +1,18 @@
 #!/usr/bin/env perl
 use strict;
+use Getopt::Std;
 use List::Util qw(max);
 
-my $base = shift || "opcodes";
+my %opts;
+getopt('bch', \%opts);
+my $base = $opts{b} || "opcodes";
+my $cfile = $opts{c}
+    or die "No -c FILE option provided (output filename.c)";
+my $hfile = $opts{h}
+    or die "No -h FILE option provided (output filename.h)";
+
+open my $c, ">", $cfile;
+open my $h, ">", $hfile;
 
 my @ops;
 my %ops;
@@ -62,8 +72,10 @@ my $w1 = max map { length } keys %modes;
 my $w2 = max map { length $_->{bytes}  } map { @$_ } @ops;
 my $w3 = max map { length $_->{cycles} } map { @$_ } @ops;
 
+sub legalize { (my $a = $_[0]) =~ s/\+/P/g; $a }
+
 # TODO pager
-print <<EOF;
+print $h <<EOF;
 #ifndef \U${base}_H_\E
 #define \U${base}_H_\E
 
@@ -82,7 +94,7 @@ enum op {
 /// Addressing modes
 enum mode {
     @{ [ join ",\n    ",
-            map { (my $a = $_) =~ s/\+/P/g; "MODE_$a" } sort(keys %modes), "MAX" ] }
+            map { ${\ legalize("MODE_$_") } } sort(keys %modes), "MAX" ] }
 };
 
 /// General opcode information
@@ -94,17 +106,38 @@ struct opinfo {
     uint8_t     bytes;  ///< how many bytes in operation
 };
 
+extern int opnames_size;
+extern int pages_size;
+extern int optable_size[];
+
+#endif
+
+/* vi:set ts=4 sw=4 et: */
+/* vim:set syntax=c.doxygen: */
+
+EOF
+
+local $" = ", ";
+my @page_sizes = map { scalar @$_ } @ops;
+
+print $c <<EOF;
+#include "$hfile"
+
+#define countof(X) (sizeof (X) / sizeof (X)[0])
+
 ////////////////////////////////////////////////////////////////////////////////
 // Data declarations
 ////////////////////////////////////////////////////////////////////////////////
 
-static const char *opnames[] = {
+const char *opnames[] = {
 #define NAMED(X) [OP_##X] = #X
     @{ [ join ",\n    ", map { "NAMED($_)" } sort(keys %ops) ] }
 #undef NAMED
 };
 
-static const struct {
+int opnames_size = countof(opnames);
+
+const struct {
     uint8_t index;          ///< which page this is
     bool    prebyte_cnt;    ///< how many prebytes are required for this page
     uint8_t prebyte_val[1]; ///< what the prebyte value(s) is / are
@@ -122,20 +155,22 @@ static const struct {
     ] }
 };
 
-static const struct opinfo optable[${\ scalar @pages}][256] = {
+int pages_size = countof(pages);
+
+const struct opinfo optable[${\ scalar @pages}][256] = {
     @{ [
         join ",\n    ", map {
             "[$_->{index}] = {\n        " .
                 (join ",\n        ", map { sprintf
                     "[0x%02X] = { OP_%-${w0}s, MODE_%-${w1}s, 0x%02X, %u, %${w3}u }",
-                        @{$_}{qw(opcode type mode opcode bytes cycles)}
+                        map { legalize $_ } @{$_}{qw(opcode type mode opcode bytes cycles)}
                 } @{ $ops[$_->{index}] }) .
             "\n    }"
         } @pages
     ] }
 };
 
-#endif
+int optable_size[] = { @page_sizes };
 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */

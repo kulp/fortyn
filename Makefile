@@ -4,13 +4,14 @@ CFILES = $(wildcard *.c)
 override CFLAGS += -g
 all: sim
 
+sim: ops.o
+
 CLEANFILES += sim
 
-CLEANFILES += ops.h
+CLEANFILES += ops.h ops.c
 
-ops.h: $(HC_MODEL).ops
-	./make_opcode_table.pl < $< > $@.temp
-	mv $@.temp $@
+ops.c ops.h: $(HC_MODEL).ops
+	./make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c $(basename $@).c < $<
 
 CLOBBERFILES += $(HC_MODEL).ops
 $(HC_MODEL).ops: $(HC_MODEL).txt
