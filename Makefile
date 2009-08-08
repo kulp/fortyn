@@ -1,10 +1,12 @@
 HC_MODEL ?= MC9S08GB60A
 CFILES = $(wildcard *.c)
+DEFINES += _LITTLE_ENDIAN
 
-override CFLAGS += -g
+override CFLAGS += -g -std=c99 -W -Wall -pedantic-errors #-Werror
+override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 all: sim
 
-sim: ops.o
+sim: ops.o hc08.o
 
 CLEANFILES += sim
 
@@ -40,7 +42,7 @@ endif
 
 %.d: %.c
 	@set -e; rm -f $@; \
-	$(CC) -MM -MG -MF $@.$$$$ $<; \
+	$(CC) $(CFLAGS) -MM -MG -MF $@.$$$$ $<; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 

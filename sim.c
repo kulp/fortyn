@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 struct sim_state {
     hc_state_t hc_state;
@@ -22,13 +23,15 @@ struct sim_state {
 static const struct option longopts[] = {
     { "help" , required_argument, NULL, 'h' },
     { "image", required_argument, NULL, 'i' },
-    { NULL },
+    { NULL, 0, NULL, 0 },
 };
 static const char shortopts[] = "hi:";
 
 int loop_iterate(struct sim_state *st)
 {
     int rc = 0;
+
+    hc_do_op(&st->hc_state);
 
     return rc;
 }
@@ -41,7 +44,7 @@ int load_binary_file(struct sim_state *state, const char *filename)
 
     char buf[BUFSIZ];
     ssize_t bytes;
-    int pos = 0;
+    unsigned int pos = 0;
 
     while ((bytes = read(fd, buf, sizeof buf)) > 0) {
         if (pos + bytes > sizeof state->hc_state.mem) {
@@ -97,6 +100,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Image could not be loaded or was not specified\n");
         return EXIT_FAILURE;
     }
+
+    hc_state_init(&state.hc_state);
+    hc_do_reset(&state.hc_state);
 
     while (state.running)
         rc = loop_iterate(&state);
