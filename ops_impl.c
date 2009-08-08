@@ -56,6 +56,18 @@ static int _decode_addr(hc_state_t *state, const struct opinfo *info,
     return rc;
 }
 
+static inline int _push(hc_state_t *state, uint8_t value)
+{
+    state->mem[state->regs.SP.word--] = value;
+    return 0;
+}
+
+static inline int _pop(hc_state_t *state, uint8_t *value)
+{
+    *value = state->mem[++state->regs.SP.word];
+    return 0;
+}
+
 int handle_op_ADC(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
@@ -109,6 +121,26 @@ int handle_op_TXS(hc_state_t *state, const struct opinfo *info)
     int rc = 0;
 
     state->regs.SP.word = state->regs.HX.word - 1;
+
+    return rc;
+}
+
+int handle_op_JSR(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t   pc  = state->regs.PC.word;     // current PC (1 + current op)
+    uint16_t off = state->offset;           // how many bytes past the PC
+    addr_t   n   = pc - info->bytes + off;  // previous PC + offset
+
+    uint16_t addr;
+    rc = _decode_addr(state, info, n, &addr, NULL);
+
+    // increment variably, depending on remaining bytes in instruction
+    //state->regs.PC.word += info->bytes - off;
+    _push(state, state->regs.PC.bytes.PCL);
+    _push(state, state->regs.PC.bytes.PCH);
+    state->regs.PC.word = addr;
 
     return rc;
 }

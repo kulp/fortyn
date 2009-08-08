@@ -8,6 +8,8 @@ all: sim
 
 sim: ops.o hc08.o ops_impl.o
 
+ops_impl.o: CFLAGS += -Wno-unused-parameter
+
 CLEANFILES += sim
 
 CLEANFILES += ops.h ops.c

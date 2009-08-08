@@ -168,7 +168,7 @@ const char *modenames[] = {
 
 int modenames_size = countof(modenames);
 
-int handle_op_UNHANDLED(hc_state_t *state, struct opinfo *info)
+int handle_op_UNHANDLED(__attribute((unused)) hc_state_t *state, struct opinfo *info)
 {
     printf("Unhandled op %s\\n", opnames[info->type]);
     return info->cycles;
