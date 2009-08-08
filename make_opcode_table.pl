@@ -79,6 +79,7 @@ print $h <<EOF;
 #ifndef \U${base}_H_\E
 #define \U${base}_H_\E
 
+#include "hc08.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -112,14 +113,19 @@ struct page {
     uint8_t prebyte_val[1]; ///< what the prebyte value(s) is / are
 };
 
+typedef int (*actor_t)(hc_state_t *state, struct opinfo *info);
+
 extern const char *opnames[];               ///< string names for each op
 extern int opnames_size;                    ///< how many elements in opnames
+
+extern const actor_t actors[];              ///< mapping from ops to executors
+extern int actors_size;                     ///< how many elements in actors
 
 extern const struct page pages[];           ///< descriptions of op pages
 extern int pages_size;                      ///< how many elements in pages
 
-extern const struct opinfo optable[][256];  ///< detailed op descriptions
-extern int optable_size[];                  ///< how many elements in optable
+extern const struct opinfo opinfos[][256];  ///< detailed op descriptions
+extern int opinfos_size[];                  ///< how many elements in opinfos
 
 #endif
 
@@ -133,6 +139,8 @@ my @page_sizes = map { scalar @$_ } @ops;
 
 print $c <<EOF;
 #include "$hfile"
+/// \@todo take out stdio reference
+#include <stdio.h>
 
 #define countof(X) (sizeof (X) / sizeof (X)[0])
 
@@ -147,6 +155,26 @@ const char *opnames[] = {
 };
 
 int opnames_size = countof(opnames);
+
+int handle_op_UNHANDLED(hc_state_t *state, struct opinfo *info)
+{
+    printf("Unhandled op %s\\n", opnames[info->type]);
+    return info->cycles;
+}
+
+@{ [
+    join "\n",
+        map {
+            "#pragma weak handle_op_$_ = handle_op_UNHANDLED\n" .
+            "int handle_op_$_(hc_state_t *state, struct opinfo *info);"
+        } sort(keys %ops)
+] }
+
+const actor_t actors[] = {
+    @{ [ join ",\n    ", map { "[OP_$_] = handle_op_$_" } sort(keys %ops) ] }
+};
+
+int actors_size = countof(actors);
 
 const struct page pages[] = {
     @{
@@ -164,7 +192,7 @@ const struct page pages[] = {
 
 int pages_size = countof(pages);
 
-const struct opinfo optable[${\ scalar @pages}][256] = {
+const struct opinfo opinfos[${\ scalar @pages}][256] = {
     @{ [
         join ",\n    ", map {
             "[$_->{index}] = {\n        " .
@@ -177,7 +205,7 @@ const struct opinfo optable[${\ scalar @pages}][256] = {
     ] }
 };
 
-int optable_size[] = { @page_sizes };
+int opinfos_size[] = { @page_sizes };
 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */

@@ -10,7 +10,7 @@ CLEANFILES += sim
 
 CLEANFILES += ops.h ops.c
 
-ops.c ops.h: $(HC_MODEL).ops
+ops.c ops.h: $(HC_MODEL).ops ./make_opcode_table.pl
 	./make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c $(basename $@).c < $<
 
 CLOBBERFILES += $(HC_MODEL).ops

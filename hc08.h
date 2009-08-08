@@ -8,8 +8,6 @@
 
 #include <stdint.h>
 
-#include "ops.h"
-
 #define MEMORY_SIZE (1UL << 15)
 
 typedef struct hc_state_s {
