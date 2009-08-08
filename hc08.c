@@ -1,6 +1,7 @@
 #include "hc08.h"
 #include "ops.h"
 
+#include <assert.h>
 #include <string.h>
 
 int hc_state_init(hc_state_t *st)
@@ -11,7 +12,7 @@ int hc_state_init(hc_state_t *st)
     memset(&st->regs, 0, sizeof st->regs);
 
     // Set always-on bits
-    st->regs.CCR.whole = 0x60;
+    st->regs.CCR.byte = 0x60;
 
     return rc;
 }
@@ -24,6 +25,11 @@ int hc_do_reset(hc_state_t *st)
     st->regs.PC.bytes.PCH = st->mem[0xFFFE];
     st->regs.PC.bytes.PCL = st->mem[0xFFFF];
 
+    // reset puts the stack pointer at 0xFF, which is a terrible place for
+    // a stack pointer to point.
+    st->regs.SP.word = 0xFF;
+
+    // mark our new state
     st->state = RUNNING;
 
     return rc;
@@ -33,7 +39,7 @@ int hc_do_reset(hc_state_t *st)
  * Determine which op page the operation at the current PC belongs to.
  *
  * @param st the processor state, which holds the PC and instruction to be
- * decoded at st->mem[st->regs.PC.whole]
+ * decoded at st->mem[st->regs.PC.word]
  *
  * @return the page number. No error conditions can be reported.
  */
@@ -41,7 +47,7 @@ int hc_op_page(hc_state_t *st)
 {
     int rc = 0; // default page is zero, the no-prefix page
 
-    uint16_t pc = st->regs.PC.whole;
+    uint16_t pc = st->regs.PC.word;
     bool found = true;
     for (int i = 0; !found && i < pages_size; i++) {
         for (int j = 0; j < pages[i].prebyte_cnt; j++) {
@@ -63,17 +69,25 @@ int hc_do_op(hc_state_t *st)
     int rc = 0;
 
     int page = hc_op_page(st);
+    assert(page < pages_size);
     st->offset += pages[page].prebyte_cnt;
+    assert(st->offset < MAX_INSN_LEN);
 
-    uint16_t *pc = &st->regs.PC.whole;
+    uint16_t *pc = &st->regs.PC.word;
 
     const struct opinfo *info = &opinfos[page][st->mem[*pc + st->offset]];
     enum op op = info->type;
     st->offset++; // account of opcode byte, so offset now points to "args"
+    assert(st->offset < MAX_INSN_LEN);
 
     /// @todo if the PC wraps, do we set flags in CCR ?
+    /// @todo a real machine doesn't have such an assertion as this, but it may
+    /// execute some trap or some such thing; find out.
+    assert(*pc + info->bytes < MEMORY_SIZE);
     (*pc) += info->bytes;
     rc = actors[op](st, info);
+
+    st->offset = 0;
 
     return rc;
 }

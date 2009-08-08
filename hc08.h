@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MEMORY_SIZE (1UL << 16)
+#define MEMORY_SIZE     (1UL << 16)
+#define MAX_INSN_LEN    4
 
 #if !defined(_BIG_ENDIAN) && !defined(_LITTLE_ENDIAN)
 #   error "Define _BIG_ENDIAN or _LITTLE_ENDIAN"
@@ -22,12 +23,21 @@
 
 /// do byte swapping for 16-bit words
 #if _BIG_ENDIAN
-#   define WORD(X) *_WP(X)
+#   define WORD(X) (*_WP(X))
 #else
-#   define WORD(X) ((*_WP(X) >> 8) & 0xFF) | (*_WP(X) << 8)
+#   define WORD(X) (((*_WP(X) >> 8) & 0xFF) | (*_WP(X) << 8))
 #endif
 
-#define HX(state) (((state).regs.H << 8) | (state).regs.X)
+#define CHECK_OVERFLOW(a,m,r) \
+    (( ((a) & 0x80) &  ((m) & 0x80) & ~((r) & 0x80)) \
+   | (~((a) & 0x80) & ~((m) & 0x80) &  ((r) & 0x80)))
+#define CHECK_HALF_CARRY(a,m,c) \
+    ((((a) & 0xF) + ((m) & 0xF) + (c)) & (1 << 4))
+
+#define CHECK_MSB(r)    (!!((r) & (1 << 7)))
+#define CHECK_CARRY(r)  (!!((r) & (1 << 8)))
+
+typedef uint16_t addr_t;
 
 typedef struct hc_state_s {
     enum {
@@ -36,10 +46,20 @@ typedef struct hc_state_s {
     short offset;               ///< position within an op under decode
     struct {
         uint8_t  A;             ///< accumulator
-        uint8_t  H;             ///< index register (high)
-        uint8_t  X;             ///< index register (low)
         union {
-            uint16_t whole;     ///< stack pointer
+            uint16_t word;
+            struct {
+#if _BIG_ENDIAN
+                uint8_t  H;     ///< index register (high)
+                uint8_t  X;     ///< index register (low)
+#else
+                uint8_t  X;     ///< index register (low)
+                uint8_t  H;     ///< index register (high)
+#endif
+            } bytes;
+        } HX;
+        union {
+            addr_t word;       ///< stack pointer
             struct {
 #if _BIG_ENDIAN
                 uint8_t SPH;    ///< high byte of SP
@@ -51,7 +71,7 @@ typedef struct hc_state_s {
             } bytes;
         } SP;
         union {
-            uint16_t whole;     ///< program counter
+            addr_t word;       ///< program counter
             struct {
 #if _BIG_ENDIAN
                 uint8_t PCH;    ///< high byte of PC
@@ -63,7 +83,7 @@ typedef struct hc_state_s {
             } bytes;
         } PC;
         union {
-            uint8_t whole;      ///< contents of entire CCR register
+            uint8_t byte;       ///< contents of entire CCR register
             struct {
                 /// @note We're depending on LSB->MSB ordering of bits within
                 /// a word here, though this ordering is not defined by C.
@@ -85,7 +105,7 @@ int hc_state_init(hc_state_t *st);
 int hc_do_reset(hc_state_t *st);
 int hc_do_op(hc_state_t *st);
 
-static inline void hc_abort(const char *fmt, ...)
+static inline void hc_error(const char *fmt, ...)
 {
     va_list vl;
     va_start(vl, fmt);
@@ -98,4 +118,5 @@ static inline void hc_abort(const char *fmt, ...)
 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */
+
 

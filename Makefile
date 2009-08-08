@@ -36,6 +36,9 @@ clean:
 clobber: clean
 	-rm -rf $(CLOBBERFILES)
 
+%.bin: %.s19
+	srec_cat -Output $@ -Binary $< -Motorola
+
 ifneq ($(MAKECMDGOALS),clean)
 -include $(CFILES:.c=.d)
 endif
