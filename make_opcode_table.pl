@@ -113,6 +113,7 @@ struct page {
     uint8_t prebyte_val[1]; ///< what the prebyte value(s) is / are
 };
 
+/// \@todo define what the return value of an actor_t means
 typedef int (*actor_t)(hc_state_t *state, struct opinfo *info);
 
 extern const char *opnames[];               ///< string names for each op
@@ -165,13 +166,18 @@ int handle_op_UNHANDLED(hc_state_t *state, struct opinfo *info)
 @{ [
     join "\n",
         map {
-            "#pragma weak handle_op_$_ = handle_op_UNHANDLED\n" .
-            "int handle_op_$_(hc_state_t *state, struct opinfo *info);"
+            sprintf "#pragma weak handle_op_%-${w0}s = handle_op_UNHANDLED\n" .
+            "int handle_op_%-${w0}s(hc_state_t *state, struct opinfo *info);",
+                $_, $_
         } sort(keys %ops)
 ] }
 
 const actor_t actors[] = {
-    @{ [ join ",\n    ", map { "[OP_$_] = handle_op_$_" } sort(keys %ops) ] }
+    @{ [
+        join ",\n    ",
+            map { sprintf "[OP_%-${w0}s] = handle_op_%s", $_, $_ }
+                sort(keys %ops)
+    ] }
 };
 
 int actors_size = countof(actors);
@@ -197,8 +203,10 @@ const struct opinfo opinfos[${\ scalar @pages}][256] = {
         join ",\n    ", map {
             "[$_->{index}] = {\n        " .
                 (join ",\n        ", map { sprintf
-                    "[0x%02X] = { OP_%-${w0}s, MODE_%-${w1}s, 0x%02X, %u, %${w3}u }",
-                        map { legalize $_ } @{$_}{qw(opcode type mode opcode bytes cycles)}
+                    "[0x%02X] = " .
+                    "{ OP_%-${w0}s, MODE_%-${w1}s, 0x%02X, %u, %${w3}u }",
+                        map { legalize $_ }
+                            @{$_}{qw(opcode type mode opcode bytes cycles)}
                 } @{ $ops[$_->{index}] }) .
             "\n    }"
         } @pages
