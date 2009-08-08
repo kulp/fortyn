@@ -5,3 +5,4 @@ sim
 *.d
 *.o
 ops.h
+.sw?
