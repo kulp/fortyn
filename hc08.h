@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 
-#define MEMORY_SIZE (1UL << 15)
+#define MEMORY_SIZE (1UL << 16)
 
 typedef struct hc_state_s {
     struct {
@@ -20,8 +20,8 @@ typedef struct hc_state_s {
         union {
             uint8_t whole;      ///< contents of entire CCR register
             struct {
-                /// @todo conditional compilation for ordering of bits in
-                /// bitfield, since ordering is not defined by C
+                /// @note We're depending on LSB->MSB ordering of bits within
+                /// a word here, though this ordering is not defined by C.
                 unsigned C:1;   ///< carry
                 unsigned Z:1;   ///< zero
                 unsigned N:1;   ///< negative
