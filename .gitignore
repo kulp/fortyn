@@ -7,3 +7,5 @@ sim
 ops.h
 ops.c
 .*.sw?
+*.bin
+*.s19
