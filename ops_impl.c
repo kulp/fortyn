@@ -1,7 +1,7 @@
 #include "ops.h"
 
 /**
- * Decodes addresses.
+ * Decodes operand addresses.
  *
  * @param state         the uC state
  * @param info          the op info
@@ -10,8 +10,8 @@
  *
  * @return an error code, or zero on success
  */
-static int _decode_addr(hc_state_t *state, const struct opinfo *info,
-                        addr_t *from, addr_t *to)
+static int _decode_addrs(hc_state_t *state, const struct opinfo *info,
+                         addr_t *from, addr_t *to)
 {
     int rc = 0;
 
@@ -74,7 +74,7 @@ int handle_op_ADC(hc_state_t *state, const struct opinfo *info)
     int rc = 0;
 
     uint16_t addr;
-    rc = _decode_addr(state, info, &addr, NULL);
+    rc = _decode_addrs(state, info, &addr, NULL);
 
     uint8_t  a = state->regs.A;
     uint8_t  m = state->mem[addr];
@@ -97,7 +97,7 @@ int handle_op_LDHX(hc_state_t *state, const struct opinfo *info)
     int rc = 0;
 
     uint16_t addr;
-    rc = _decode_addr(state, info, &addr, NULL);
+    rc = _decode_addrs(state, info, &addr, NULL);
 
     state->regs.HX.bytes.H = state->mem[addr];
     state->regs.HX.bytes.X = state->mem[addr + 1];
@@ -105,6 +105,15 @@ int handle_op_LDHX(hc_state_t *state, const struct opinfo *info)
     state->regs.CCR.bits.V = 0;
     state->regs.CCR.bits.N = CHECK_MSB(state->regs.HX.bytes.H);
     state->regs.CCR.bits.Z = WORD(state->mem[addr]) == 0;
+
+    return rc;
+}
+
+int handle_op_TSX(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    state->regs.HX.word = state->regs.SP.word + 1;
 
     return rc;
 }
@@ -118,12 +127,12 @@ int handle_op_TXS(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_JSR(hc_state_t *state, const struct opinfo *info)
+int _handle_op_JSR_BSR(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
     uint16_t addr;
-    rc = _decode_addr(state, info, &addr, NULL);
+    rc = _decode_addrs(state, info, &addr, NULL);
 
     _push(state, state->regs.PC.bytes.PCL);
     _push(state, state->regs.PC.bytes.PCH);
@@ -131,6 +140,9 @@ int handle_op_JSR(hc_state_t *state, const struct opinfo *info)
 
     return rc;
 }
+
+#pragma weak handle_op_BSR = _handle_op_JSR_BSR
+#pragma weak handle_op_JSR = _handle_op_JSR_BSR
 
 int handle_op_RTS(hc_state_t *state, const struct opinfo *info)
 {
@@ -245,6 +257,110 @@ int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
 #pragma weak handle_op_BIH  = _handle_op_BRANCHES
 #pragma weak handle_op_BRN  = _handle_op_BRANCHES
 #pragma weak handle_op_BRA  = _handle_op_BRANCHES
+
+int handle_op_AIS(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    state->regs.SP.word += (addr_t)(int8_t)state->mem[addr];
+
+    return rc;
+}
+
+/// @note untested
+int handle_op_AIX(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    state->regs.HX.word += (addr_t)(int8_t)state->mem[addr];
+
+    return rc;
+}
+
+/// @note untested
+int handle_op_AND(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    state->regs.A &= state->mem[addr];
+
+    state->regs.CCR.bits.V = 0;
+    state->regs.CCR.bits.N = CHECK_MSB(state->regs.A);
+    state->regs.CCR.bits.Z = state->regs.A == 0;
+
+    return rc;
+}
+
+int handle_op_LDA(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    state->regs.A = state->mem[addr];
+
+    state->regs.CCR.bits.V = 0;
+    state->regs.CCR.bits.N = CHECK_MSB(state->regs.A);
+    state->regs.CCR.bits.Z = state->regs.A == 0;
+
+
+    return rc;
+}
+
+int handle_op_INC(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    uint8_t result;
+
+    if (info->mode == MODE_INH) {
+        switch (info->type) {
+            case OP_INCA: result = ++state->regs.A;          break;
+            case OP_INCX: result = ++state->regs.HX.bytes.X; break;
+            default: break;
+        }
+    } else {
+        addr_t addr;
+        _decode_addrs(state, info, &addr, NULL);
+
+        result = ++state->mem[addr];
+    }
+
+    state->regs.CCR.bits.V = !CHECK_MSB(state->regs.A) & CHECK_MSB(result);
+    state->regs.CCR.bits.N = CHECK_MSB(state->regs.A);
+    state->regs.CCR.bits.Z = result == 0;
+
+    return rc;
+}
+
+#pragma weak handle_op_INCA = handle_op_INC
+#pragma weak handle_op_INCX = handle_op_INC
+
+int handle_op_STA(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    state->mem[addr] = state->regs.A;
+
+    state->regs.CCR.bits.V = 0;
+    state->regs.CCR.bits.N = CHECK_MSB(state->mem[addr]);
+    state->regs.CCR.bits.Z = state->mem[addr] == 0;
+
+    return rc;
+}
 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */

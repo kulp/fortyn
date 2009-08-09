@@ -52,8 +52,8 @@ int hc_op_page(hc_state_t *st)
     int rc = 0; // default page is zero, the no-prefix page
 
     uint16_t pc = st->regs.PC.word;
-    bool found = true;
-    for (int i = 0; !found && i < pages_size; i++) {
+    for (int i = pages_size - 1; i >= 0; i--) {
+        bool found = true;
         for (int j = 0; j < pages[i].prebyte_cnt; j++) {
             if (pages[i].prebyte_val[j] != st->mem[pc + j]) {
                 found = false;
@@ -61,8 +61,10 @@ int hc_op_page(hc_state_t *st)
             }
         }
 
-        if (found)
+        if (found) {
             rc = i;
+            break;
+        }
     }
 
     return rc;

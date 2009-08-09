@@ -67,7 +67,7 @@ while (<>) {
     }
 }
 
-my $w0 = max map { length } keys %ops;
+my $w0 = max map { length } keys(%ops), "INVALID";
 my $w1 = max map { length } keys %modes;
 my $w2 = max map { length $_->{bytes}  } map { @$_ } @ops;
 my $w3 = max map { length $_->{cycles} } map { @$_ } @ops;
@@ -168,7 +168,15 @@ const char *modenames[] = {
 
 int modenames_size = countof(modenames);
 
-int handle_op_UNHANDLED(__attribute((unused)) hc_state_t *state, struct opinfo *info)
+int handle_op_INVALID(__attribute__((unused)) hc_state_t *state,
+                      __attribute__((unused)) const struct opinfo *info)
+{
+    printf("INVALID op encountered\\n");
+    return info->cycles;
+}
+
+int handle_op_UNHANDLED(__attribute__((unused)) hc_state_t *state,
+                        __attribute__((unused)) const struct opinfo *info)
 {
     printf("Unhandled op %s\\n", opnames[info->type]);
     return info->cycles;
@@ -187,7 +195,7 @@ const actor_t actors[] = {
     @{ [
         join ",\n    ",
             map { sprintf "[OP_%-${w0}s] = handle_op_%s", $_, $_ }
-                sort(keys %ops)
+                sort(keys %ops), "INVALID"
     ] }
 };
 
