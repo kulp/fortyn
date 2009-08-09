@@ -6,13 +6,16 @@ override CFLAGS += -g -std=c99 -W -Wall -pedantic-errors #-Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 all: sim
 
-sim: ops.o hc08.o ops_impl.o
+# Ordering is important here: there may be multiple weak definitions of any
+# particular op handler, and in such a case the first definition is taken (which
+# should not be the default handler from ops.o).
+sim: hc08.o ops_impl.o ops.o 
 
 ops_impl.o: CFLAGS += -Wno-unused-parameter
 
 CLEANFILES += sim
 
-CLEANFILES += ops.h ops.c
+CLOBBERFILES += ops.h ops.c
 
 ops.c ops.h: $(HC_MODEL).ops ./make_opcode_table.pl
 	./make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c $(basename $@).c < $<

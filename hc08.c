@@ -29,6 +29,10 @@ int hc_do_reset(hc_state_t *st)
     // a stack pointer to point.
     st->regs.SP.word = 0xFF;
 
+    // disable interrupts so the application can safely set up the new (and
+    // reasonable) stack pointer
+    st->regs.CCR.bits.I = 1;
+
     // mark our new state
     st->state = RUNNING;
 
