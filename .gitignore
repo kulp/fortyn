@@ -4,8 +4,6 @@ sim
 *.pdf
 *.d
 *.o
-ops.h
-ops.c
 .*.sw?
 *.bin
 *.s19

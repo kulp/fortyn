@@ -187,6 +187,10 @@ int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
 
     bool cond = false;
 
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+    bool m = state->mem[addr];
+
     bool c = state->regs.CCR.bits.C;
     bool h = state->regs.CCR.bits.H;
     bool i = state->regs.CCR.bits.I;
@@ -221,6 +225,14 @@ int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
         case OP_BRN : cond ^= 1; /* FALLTHROUGH */
         case OP_BRA : cond ^= 1;                break;
 
+        case OP_BRCLR0: case OP_BRCLR1: case OP_BRCLR2: case OP_BRCLR3:
+        case OP_BRCLR4: case OP_BRCLR5: case OP_BRCLR6: case OP_BRCLR7:
+            cond ^= 1; /* FALLTHROUGH */
+        case OP_BRSET0: case OP_BRSET1: case OP_BRSET2: case OP_BRSET3:
+        case OP_BRSET4: case OP_BRSET5: case OP_BRSET6: case OP_BRSET7:
+            cond ^= !!(m & (1 << ((op - OP_BRSET0) >> 1)));
+            break;
+
         default: break;
     }
 
@@ -236,27 +248,45 @@ int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-#pragma weak handle_op_BRA  = _handle_op_BRANCHES
-#pragma weak handle_op_BLE  = _handle_op_BRANCHES
-#pragma weak handle_op_BGT  = _handle_op_BRANCHES
-#pragma weak handle_op_BLT  = _handle_op_BRANCHES
-#pragma weak handle_op_BGE  = _handle_op_BRANCHES
-#pragma weak handle_op_BNE  = _handle_op_BRANCHES
-#pragma weak handle_op_BEQ  = _handle_op_BRANCHES
-#pragma weak handle_op_BLS  = _handle_op_BRANCHES
-#pragma weak handle_op_BHI  = _handle_op_BRANCHES
-#pragma weak handle_op_BCS  = _handle_op_BRANCHES
-#pragma weak handle_op_BCC  = _handle_op_BRANCHES
-#pragma weak handle_op_BPL  = _handle_op_BRANCHES
-#pragma weak handle_op_BMI  = _handle_op_BRANCHES
-#pragma weak handle_op_BMC  = _handle_op_BRANCHES
-#pragma weak handle_op_BMS  = _handle_op_BRANCHES
-#pragma weak handle_op_BHCC = _handle_op_BRANCHES
-#pragma weak handle_op_BHCS = _handle_op_BRANCHES
-#pragma weak handle_op_BIL  = _handle_op_BRANCHES
-#pragma weak handle_op_BIH  = _handle_op_BRANCHES
-#pragma weak handle_op_BRN  = _handle_op_BRANCHES
-#pragma weak handle_op_BRA  = _handle_op_BRANCHES
+#pragma weak handle_op_BRA    = _handle_op_BRANCHES
+#pragma weak handle_op_BLE    = _handle_op_BRANCHES
+#pragma weak handle_op_BGT    = _handle_op_BRANCHES
+#pragma weak handle_op_BLT    = _handle_op_BRANCHES
+#pragma weak handle_op_BGE    = _handle_op_BRANCHES
+#pragma weak handle_op_BNE    = _handle_op_BRANCHES
+#pragma weak handle_op_BEQ    = _handle_op_BRANCHES
+#pragma weak handle_op_BLS    = _handle_op_BRANCHES
+#pragma weak handle_op_BHI    = _handle_op_BRANCHES
+#pragma weak handle_op_BCS    = _handle_op_BRANCHES
+#pragma weak handle_op_BCC    = _handle_op_BRANCHES
+#pragma weak handle_op_BPL    = _handle_op_BRANCHES
+#pragma weak handle_op_BMI    = _handle_op_BRANCHES
+#pragma weak handle_op_BMC    = _handle_op_BRANCHES
+#pragma weak handle_op_BMS    = _handle_op_BRANCHES
+#pragma weak handle_op_BHCC   = _handle_op_BRANCHES
+#pragma weak handle_op_BHCS   = _handle_op_BRANCHES
+#pragma weak handle_op_BIL    = _handle_op_BRANCHES
+#pragma weak handle_op_BIH    = _handle_op_BRANCHES
+#pragma weak handle_op_BRN    = _handle_op_BRANCHES
+#pragma weak handle_op_BRA    = _handle_op_BRANCHES
+
+/// @todo test BR(SET|CLR)[0-7]
+#pragma weak handle_op_BRSET0 = _handle_op_BRANCHES
+#pragma weak handle_op_BRSET1 = _handle_op_BRANCHES
+#pragma weak handle_op_BRSET2 = _handle_op_BRANCHES
+#pragma weak handle_op_BRSET3 = _handle_op_BRANCHES
+#pragma weak handle_op_BRSET4 = _handle_op_BRANCHES
+#pragma weak handle_op_BRSET5 = _handle_op_BRANCHES
+#pragma weak handle_op_BRSET6 = _handle_op_BRANCHES
+#pragma weak handle_op_BRSET7 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR0 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR1 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR2 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR3 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR4 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR5 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR6 = _handle_op_BRANCHES
+#pragma weak handle_op_BRCLR7 = _handle_op_BRANCHES
 
 int handle_op_AIS(hc_state_t *state, const struct opinfo *info)
 {
@@ -361,6 +391,41 @@ int handle_op_STA(hc_state_t *state, const struct opinfo *info)
 
     return rc;
 }
+
+int _handle_op_BSET_BCLR(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    enum op op = info->type;
+    uint8_t mask = 1 << ((op - OP_BRSET0) >> 1);
+
+    // BCLRX opcodes are odd, BSETX are even
+    if (op & 1) state->mem[addr] &= ~mask;
+    else        state->mem[addr] |=  mask;
+
+    return rc;
+}
+
+/// @todo test B(SET|CLR)[0-7]
+#pragma weak handle_op_BSET0 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BSET1 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BSET2 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BSET3 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BSET4 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BSET5 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BSET6 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BSET7 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR0 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR1 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR2 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR3 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR4 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR5 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR6 = _handle_op_BSET_BCLR
+#pragma weak handle_op_BCLR7 = _handle_op_BSET_BCLR
 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */
