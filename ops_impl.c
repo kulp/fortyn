@@ -63,7 +63,7 @@ static inline int _push(hc_state_t *state, uint8_t value)
     return 0;
 }
 
-static inline int _pop(hc_state_t *state, uint8_t *value)
+static inline int _pull(hc_state_t *state, uint8_t *value)
 {
     *value = state->mem[++state->regs.SP.word];
     return 0;
@@ -145,7 +145,7 @@ int _handle_op_AND_BIT(hc_state_t *state, const struct opinfo *info)
 #pragma weak handle_op_BIT = _handle_op_AND_BIT
 
 /// @todo test ASR / LSR
-int _handle_op_ASR_LSR(hc_state_t *state, const struct opinfo *info)
+int _handle_op_ASR_LSR_ROR(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -157,16 +157,26 @@ int _handle_op_ASR_LSR(hc_state_t *state, const struct opinfo *info)
     bool logical = false;
     switch (op) {
         case OP_LSR : logical = true; /* FALLTHROUGH */
+        case OP_ROR :                 /* FALLTHROUGH */
         case OP_ASR : r = &state->mem[addr];        break;
         case OP_LSRA: logical = true; /* FALLTHROUGH */
+        case OP_RORA:                 /* FALLTHROUGH */
         case OP_ASRA: r = &state->regs.A;           break;
         case OP_LSRX: logical = true; /* FALLTHROUGH */
+        case OP_RORX:                 /* FALLTHROUGH */
         case OP_ASRX: r = &state->regs.HX.bytes.X;  break;
         default: hc_error("Invalid op");
     }
 
+    unsigned oldc = state->regs.CCR.bits.C;
     unsigned c = state->regs.CCR.bits.C = *r & 1;
     *r = (logical ? *r >> 1 : (int8_t)*r >> 1);
+
+    switch (op) {
+        case OP_ROR: case OP_RORA: case OP_RORX:
+            *r |= oldc << 7;
+        default: break;
+    }
 
     unsigned n = state->regs.CCR.bits.N = CHECK_MSB(*r);
     state->regs.CCR.bits.V = n ^ c;
@@ -175,12 +185,15 @@ int _handle_op_ASR_LSR(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-#pragma weak handle_op_ASR  = _handle_op_ASR_LSR
-#pragma weak handle_op_ASRA = _handle_op_ASR_LSR
-#pragma weak handle_op_ASRX = _handle_op_ASR_LSR
-#pragma weak handle_op_LSR  = _handle_op_ASR_LSR
-#pragma weak handle_op_LSRA = _handle_op_ASR_LSR
-#pragma weak handle_op_LSRX = _handle_op_ASR_LSR
+#pragma weak handle_op_ASR  = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_ASRA = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_ASRX = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_LSR  = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_LSRA = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_LSRX = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_ROR  = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_RORA = _handle_op_ASR_LSR_ROR
+#pragma weak handle_op_RORX = _handle_op_ASR_LSR_ROR
 
 int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
 {
@@ -525,7 +538,7 @@ int handle_op_LDHX(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_LSL(hc_state_t *state, const struct opinfo *info)
+int _handle_op_LSL_ROL(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -541,8 +554,15 @@ int _handle_op_LSL(hc_state_t *state, const struct opinfo *info)
         default: hc_error("Invalid op");
     }
 
+    unsigned oldc = state->regs.CCR.bits.C;
     unsigned c = state->regs.CCR.bits.C = !!(*r & 0x80);
     *r <<= 1;
+
+    switch (op) {
+        case OP_ROL: case OP_ROLA: case OP_ROLX:
+            *r |= oldc;
+        default: break;
+    }
 
     unsigned n = state->regs.CCR.bits.N = CHECK_MSB(*r);
     state->regs.CCR.bits.V = n ^ c;
@@ -551,9 +571,13 @@ int _handle_op_LSL(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-#pragma weak handle_op_LSL  = _handle_op_LSL
-#pragma weak handle_op_LSLA = _handle_op_LSL
-#pragma weak handle_op_LSLX = _handle_op_LSL
+#pragma weak handle_op_LSL  = _handle_op_LSL_ROL
+#pragma weak handle_op_LSLA = _handle_op_LSL_ROL
+#pragma weak handle_op_LSLX = _handle_op_LSL_ROL
+#pragma weak handle_op_ROL  = _handle_op_LSL_ROL
+#pragma weak handle_op_ROLA = _handle_op_LSL_ROL
+#pragma weak handle_op_ROLX = _handle_op_LSL_ROL
+
 
 /// @todo test NEG
 int _handle_op_NEG(hc_state_t *state, const struct opinfo *info)
@@ -597,12 +621,63 @@ int handle_op_NOP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
+int _handle_op_PUL(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    uint8_t *r;
+    switch (info->type) {
+        case OP_PULA: r = &state->regs.A;           break;
+        case OP_PULH: r = &state->regs.HX.bytes.H;  break;
+        case OP_PULX: r = &state->regs.HX.bytes.X;  break;
+        default: hc_error("Invalid op");
+    }
+
+    _pull(state, r);
+
+    return rc;
+}
+
+#pragma weak handle_op_PULA = _handle_op_PUL
+#pragma weak handle_op_PULH = _handle_op_PUL
+#pragma weak handle_op_PULX = _handle_op_PUL
+
+int _handle_op_PSH(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    uint8_t *r;
+    switch (info->type) {
+        case OP_PSHA: r = &state->regs.A;           break;
+        case OP_PSHH: r = &state->regs.HX.bytes.H;  break;
+        case OP_PSHX: r = &state->regs.HX.bytes.X;  break;
+        default: hc_error("Invalid op");
+    }
+
+    _push(state, *r);
+
+    return rc;
+}
+
+#pragma weak handle_op_PSHA = _handle_op_PSH
+#pragma weak handle_op_PSHH = _handle_op_PSH
+#pragma weak handle_op_PSHX = _handle_op_PSH
+
+int handle_op_RSP(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    state->regs.SP.bytes.SPH = 0xFF;
+
+    return rc;
+}
+
 int handle_op_RTS(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
-    _pop(state, &state->regs.PC.bytes.PCH);
-    _pop(state, &state->regs.PC.bytes.PCL);
+    _pull(state, &state->regs.PC.bytes.PCH);
+    _pull(state, &state->regs.PC.bytes.PCL);
 
     return rc;
 }
