@@ -26,9 +26,24 @@ my @pages = (
     { index => 1, prebytes => [ 0x9E ] },
 );
 
-while (<>) {
-    chomp;
-    my ($op, $sz, $mne, $cyc, $mode) = split /\|/;
+my $pattern = qr{
+    ^                       # start
+    (?:9E)?[[:xdigit:]]{2}  # opcode
+    \s+                     # space
+    \d+\+?\n                # cycles
+    \s*                     # space
+    \w+\n                   # mnemonic
+    \d+                     # bytes
+    \s+                     # space
+    \S+                     # addressing mode
+    $                       # end
+}xsm;
+
+local $/;       # turn on slurping
+local $_ = <>;  # slurp file
+
+for (/$pattern/g) {
+    my ($op, $sz, $mne, $cyc, $mode) = split;
 
     my $opcode = (hex $op) & 0xFF;
     my $page_index = 1;
@@ -82,6 +97,10 @@ print $h <<EOF;
 #include "hc08.h"
 #include <stdbool.h>
 #include <stdint.h>
+
+#ifndef countof
+#define countof(X) (sizeof (X) / sizeof (X)[0])
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type definitions
@@ -146,8 +165,6 @@ print $c <<EOF;
 /// \@todo take out stdio reference
 #include <stdio.h>
 
-#define countof(X) (sizeof (X) / sizeof (X)[0])
-
 ////////////////////////////////////////////////////////////////////////////////
 // Data declarations
 ////////////////////////////////////////////////////////////////////////////////
@@ -168,15 +185,15 @@ const char *modenames[] = {
 
 int modenames_size = countof(modenames);
 
-int handle_op_INVALID(__attribute__((unused)) hc_state_t *state,
-                      __attribute__((unused)) const struct opinfo *info)
+static int handle_op_INVALID(__attribute__((unused)) hc_state_t *state,
+                             __attribute__((unused)) const struct opinfo *info)
 {
     printf("INVALID op encountered\\n");
     return info->cycles;
 }
 
-int handle_op_UNHANDLED(__attribute__((unused)) hc_state_t *state,
-                        __attribute__((unused)) const struct opinfo *info)
+static int handle_op_UNHANDLED(__attribute__((unused)) hc_state_t *state,
+                               __attribute__((unused)) const struct opinfo *info)
 {
     printf("Unhandled op %s\\n", opnames[info->type]);
     return info->cycles;

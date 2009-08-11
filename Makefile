@@ -17,12 +17,9 @@ CLEANFILES += sim
 
 CLOBBERFILES += ops.h ops.c
 
-ops.c ops.h: $(HC_MODEL).ops ./make_opcode_table.pl
-	./make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c $(basename $@).c < $<
-
-CLOBBERFILES += $(HC_MODEL).ops
-$(HC_MODEL).ops: $(HC_MODEL).txt
-	perl -ne 'print if /Opcode Map/.../Opcode Map/' $< | ./munge_ops_table.pl > $@
+ops.c ops.h: $(HC_MODEL).txt ./make_opcode_table.pl
+	perl -ne 'print if /Opcode Map/.../Opcode Map/' $< | \
+		./make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c $(basename $@).c
 
 .SECONDARY: $(HC_MODEL).txt
 CLOBBERFILES += $(HC_MODEL).txt

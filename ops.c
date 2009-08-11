@@ -2,8 +2,6 @@
 /// @todo take out stdio reference
 #include <stdio.h>
 
-#define countof(X) (sizeof (X) / sizeof (X)[0])
-
 ////////////////////////////////////////////////////////////////////////////////
 // Data declarations
 ////////////////////////////////////////////////////////////////////////////////
@@ -182,14 +180,14 @@ const char *modenames[] = {
 int modenames_size = countof(modenames);
 
 static int handle_op_INVALID(__attribute__((unused)) hc_state_t *state,
-                      __attribute__((unused)) const struct opinfo *info)
+                             __attribute__((unused)) const struct opinfo *info)
 {
     printf("INVALID op encountered\n");
     return info->cycles;
 }
 
 static int handle_op_UNHANDLED(__attribute__((unused)) hc_state_t *state,
-                        __attribute__((unused)) const struct opinfo *info)
+                               __attribute__((unused)) const struct opinfo *info)
 {
     printf("Unhandled op %s\n", opnames[info->type]);
     return info->cycles;
