@@ -34,12 +34,16 @@ $(HC_MODEL).pdf:
 	wget http://www.freescale.com/files/microcontrollers/doc/data_sheet/$(notdir $@)
 
 CLEANFILES += *.[od]
-.PHONY: clean clobber
+.PHONY: clean clobber todo
 clean:
 	-rm -rf $(CLEANFILES)
 
 clobber: clean
 	-rm -rf $(CLOBBERFILES)
+
+todo:
+	@-UNHANDLED=$$(nm sim | grep UNHANDLED | cut -d' ' -f1); \
+	nm sim | grep handle_op | grep $$UNHANDLED | cut -d_ -f3 |grep -v UNHANDLED
 
 %.bin: %.s19
 	srec_cat -Output $@ -Binary $< -Motorola

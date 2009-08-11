@@ -69,17 +69,19 @@ static inline int _pop(hc_state_t *state, uint8_t *value)
     return 0;
 }
 
-int handle_op_ADC(hc_state_t *state, const struct opinfo *info)
+int _handle_op_ADC_ADD(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
     uint16_t addr;
     rc = _decode_addrs(state, info, &addr, NULL);
 
+    enum op op = info->type;
+
     uint8_t  a = state->regs.A;
     uint8_t  m = state->mem[addr];
     uint8_t  c = state->regs.CCR.bits.C;
-    uint16_t r = a + m + c;
+    uint16_t r = a + m + (op == OP_ADC ? c : 0);
 
     state->regs.A = r & 0xFF;
 
@@ -91,6 +93,9 @@ int handle_op_ADC(hc_state_t *state, const struct opinfo *info)
 
     return rc;
 }
+
+#pragma weak handle_op_ADC = _handle_op_ADC_ADD
+#pragma weak handle_op_ADD = _handle_op_ADC_ADD
 
 int handle_op_LDHX(hc_state_t *state, const struct opinfo *info)
 {
@@ -314,14 +319,16 @@ int handle_op_AIX(hc_state_t *state, const struct opinfo *info)
 }
 
 /// @note untested
-int handle_op_AND(hc_state_t *state, const struct opinfo *info)
+int _handle_op_AND_BIT(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
     addr_t addr;
     _decode_addrs(state, info, &addr, NULL);
 
-    state->regs.A &= state->mem[addr];
+    uint8_t temp = state->regs.A & state->mem[addr];
+    if (info->type == OP_AND) state->regs.A = temp;
+    // otherwise we are doing a BIT; only change CCR
 
     state->regs.CCR.bits.V = 0;
     state->regs.CCR.bits.N = CHECK_MSB(state->regs.A);
@@ -329,6 +336,9 @@ int handle_op_AND(hc_state_t *state, const struct opinfo *info)
 
     return rc;
 }
+
+#pragma weak handle_op_AND = _handle_op_AND_BIT
+#pragma weak handle_op_BIT = _handle_op_AND_BIT
 
 int handle_op_LDA(hc_state_t *state, const struct opinfo *info)
 {
@@ -426,6 +436,185 @@ int _handle_op_BSET_BCLR(hc_state_t *state, const struct opinfo *info)
 #pragma weak handle_op_BCLR5 = _handle_op_BSET_BCLR
 #pragma weak handle_op_BCLR6 = _handle_op_BSET_BCLR
 #pragma weak handle_op_BCLR7 = _handle_op_BSET_BCLR
+
+/// @todo test ASR / LSR
+int _handle_op_ASR_LSR(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    enum op op = info->type;
+    uint8_t *r;
+    bool logical = false;
+    switch (op) {
+        case OP_LSR : logical = true; /* FALLTHROUGH */
+        case OP_ASR : r = &state->mem[addr];        break;
+        case OP_LSRA: logical = true; /* FALLTHROUGH */
+        case OP_ASRA: r = &state->regs.A;           break;
+        case OP_LSRX: logical = true; /* FALLTHROUGH */
+        case OP_ASRX: r = &state->regs.HX.bytes.X;  break;
+        default: hc_error("Invalid op");
+    }
+
+    unsigned c = state->regs.CCR.bits.C = *r & 1;
+    *r = (logical ? *r >> 1 : (int8_t)*r >> 1);
+
+    unsigned n = state->regs.CCR.bits.N = CHECK_MSB(*r);
+    state->regs.CCR.bits.V = n ^ c;
+    state->regs.CCR.bits.Z = *r == 0;
+
+    return rc;
+}
+
+#pragma weak handle_op_ASR  = _handle_op_ASR_LSR
+#pragma weak handle_op_ASRA = _handle_op_ASR_LSR
+#pragma weak handle_op_ASRX = _handle_op_ASR_LSR
+#pragma weak handle_op_LSR  = _handle_op_ASR_LSR
+#pragma weak handle_op_LSRA = _handle_op_ASR_LSR
+#pragma weak handle_op_LSRX = _handle_op_ASR_LSR
+
+int _handle_op_LSL(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    enum op op = info->type;
+    uint8_t *r;
+    switch (op) {
+        case OP_LSL : r = &state->mem[addr];        break;
+        case OP_LSLA: r = &state->regs.A;           break;
+        case OP_LSLX: r = &state->regs.HX.bytes.X;  break;
+        default: hc_error("Invalid op");
+    }
+
+    unsigned c = state->regs.CCR.bits.C = !!(*r & 0x80);
+    *r <<= 1;
+
+    unsigned n = state->regs.CCR.bits.N = CHECK_MSB(*r);
+    state->regs.CCR.bits.V = n ^ c;
+    state->regs.CCR.bits.Z = *r == 0;
+
+    return rc;
+}
+
+#pragma weak handle_op_LSL  = _handle_op_LSL
+#pragma weak handle_op_LSLA = _handle_op_LSL
+#pragma weak handle_op_LSLX = _handle_op_LSL
+
+/// @todo test CLR
+int _handle_op_CLR(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    enum op op = info->type;
+    uint8_t *r;
+    switch (op) {
+        case OP_CLR : r = &state->mem[addr];        break;
+        case OP_CLRA: r = &state->regs.A;           break;
+        case OP_CLRH: r = &state->regs.HX.bytes.H;  break;
+        case OP_CLRX: r = &state->regs.HX.bytes.X;  break;
+        default: hc_error("Invalid op");
+    }
+
+    *r = 0;
+
+    state->regs.CCR.bits.N = 0;
+    state->regs.CCR.bits.V = 0;
+    state->regs.CCR.bits.Z = 1;
+
+    return rc;
+}
+
+#pragma weak handle_op_CLR  = _handle_op_CLR
+#pragma weak handle_op_CLRA = _handle_op_CLR
+#pragma weak handle_op_CLRH = _handle_op_CLR
+#pragma weak handle_op_CLRX = _handle_op_CLR
+
+/// @todo test NEG
+int _handle_op_NEG(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    enum op op = info->type;
+    uint8_t *r;
+    switch (op) {
+        case OP_NEG : r = &state->mem[addr];        break;
+        case OP_NEGA: r = &state->regs.A;           break;
+        case OP_NEGX: r = &state->regs.HX.bytes.X;  break;
+        default: hc_error("Invalid op");
+    }
+
+    uint8_t orig = *r;
+    if (*r != 0x80)
+        *r = -*r;
+
+    state->regs.CCR.bits.C = !!*r;
+    state->regs.CCR.bits.N = CHECK_MSB(*r);
+    state->regs.CCR.bits.V = !!(*r & orig & 0x80);
+    state->regs.CCR.bits.Z = *r == 0;
+
+    return rc;
+}
+
+#pragma weak handle_op_NEG  = _handle_op_NEG
+#pragma weak handle_op_NEGA = _handle_op_NEG
+#pragma weak handle_op_NEGX = _handle_op_NEG
+
+/// @todo test DAA
+int handle_op_DAA(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    /// @note From Table A-2 in the HCS08 Family Reference Manual
+    static const struct {
+        uint8_t iC;
+        uint8_t iLoTopA, iHiTopA;
+        uint8_t iH;
+        uint8_t iLoBotA, iHiBotA;
+        uint8_t factor;
+        uint8_t oC;
+    } t[] = {
+        0, 0x0, 0x9, 0, 0x0, 0x9, 0x00, 0,
+        0, 0x0, 0x8, 0, 0xA, 0xF, 0x06, 0,
+        0, 0x0, 0x9, 1, 0x0, 0x3, 0x06, 0,
+        0, 0xA, 0xF, 0, 0x0, 0x9, 0x60, 1,
+        0, 0x9, 0xF, 0, 0xA, 0xF, 0x66, 1,
+        0, 0xA, 0xF, 1, 0x0, 0x3, 0x66, 1,
+        1, 0x0, 0x2, 0, 0x0, 0x9, 0x60, 1,
+        1, 0x0, 0x2, 0, 0xA, 0xF, 0x66, 1,
+        1, 0x0, 0x3, 1, 0x0, 0x3, 0x66, 1,
+    };
+
+    uint8_t c = state->regs.CCR.bits.C;
+    uint8_t h = state->regs.CCR.bits.H;
+    uint8_t TopA = state->regs.A >> 4;
+    uint8_t BotA = state->regs.A & 0xF;
+
+    for (int i = 0; i < countof(correction); i++) {
+        if (c    == t[i].iC &&
+            TopA >= t[i].iLoTopA &&
+            TopA <= t[i].iHiTopA &&
+            BotA >= t[i].iLoBotA &&
+            BotA <= t[i].iHiBotA &&
+            h    == t[i].iH)
+        {
+            state->regs.CCR.bits.C = t[i].oC;
+            state->regs.A += t[i].factor;
+        }
+    }
+
+    return rc;
+}
 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */
