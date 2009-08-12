@@ -38,7 +38,6 @@ static int _decode_addrs(hc_state_t *state, const struct opinfo *info,
         case MODE_IX2 :
             *from = state->regs.HX.word;
             switch (mode) {
-                /// @todo FIXME this increment happens too early
                 case MODE_IXP : state->regs.HX.word++;
                 case MODE_IX1P: if (mode != MODE_IX1P) break;
                 case MODE_IX1 : *from += state->mem[pos];       break;
@@ -353,7 +352,22 @@ int _handle_op_CBEQ_CBEQA_CBEQX(hc_state_t *state, const struct opinfo *info)
     addr_t addr;
     _decode_addrs(state, info, &addr, NULL);
 
-    /// @todo implement
+    uint8_t *r;
+    if (info->type == OP_CBEQX) {
+        r = &state->regs.HX.bytes.X;
+    } else { // operate on A register
+        r = &state->regs.A;
+    }
+
+    if (*r == state->mem[addr]) {
+        addr_t   pc  = state->regs.PC.word;     // current PC (1 + current op)
+        uint16_t off = state->offset;           // how many bytes past the PC
+        addr_t   pos = pc - info->bytes + off;  // previous PC + offset
+
+        if (info->mode != MODE_IXP) pos++;
+
+        state->regs.PC.word += (uint16_t)(int8_t)state->mem[pos];
+    }
 
     return rc;
 }
@@ -645,6 +659,18 @@ int handle_op_INC(hc_state_t *state, const struct opinfo *info)
 #pragma weak handle_op_INCA = handle_op_INC
 #pragma weak handle_op_INCX = handle_op_INC
 
+int handle_op_JMP(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    state->regs.PC.word = addr;
+
+    return rc;
+}
+
 int _handle_op_JSR_BSR(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
@@ -761,6 +787,26 @@ int _handle_op_LSL_ROL(hc_state_t *state, const struct opinfo *info)
 #pragma weak handle_op_ROL  = _handle_op_LSL_ROL
 #pragma weak handle_op_ROLA = _handle_op_LSL_ROL
 #pragma weak handle_op_ROLX = _handle_op_LSL_ROL
+
+int handle_op_MOV(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t from, to;
+    _decode_addrs(state, info, &from, &to);
+
+    uint8_t *r, *s;
+    r = &state->mem[to];
+    s = &state->mem[from];
+
+    *r = *s;
+
+    state->regs.CCR.bits.N = CHECK_MSB(*r);
+    state->regs.CCR.bits.V = 0;
+    state->regs.CCR.bits.Z = *r == 0;
+
+    return rc;
+}
 
 int handle_op_MUL(hc_state_t *state, const struct opinfo *info)
 {
