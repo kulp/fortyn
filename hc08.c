@@ -93,6 +93,7 @@ int hc_do_op(hc_state_t *st)
     (*pc) += info->bytes;
     rc = actors[op](st, info);
 
+    st->cycle_count += info->cycles;
     st->offset = 0;
 
     return rc;

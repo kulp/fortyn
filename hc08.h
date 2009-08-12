@@ -34,15 +34,16 @@
 #define CHECK_HALF_CARRY(a,m,c) \
     ((((a) & 0xF) + ((m) & 0xF) + (c)) & (1 << 4))
 
-#define CHECK_MSB(r)    (!!((r) & (1 << 7)))
-#define CHECK_CARRY(r)  (!!((r) & (1 << 8)))
+#define CHECK_MSB(r)    (!!((r) & (1 << (8 * sizeof r - 1))))
+#define CHECK_CARRY(r)  (!!((r) & (1 << (8 * sizeof r    ))))
 
 typedef uint16_t addr_t;
 
 typedef struct hc_state_s {
     enum {
-        POWER_OFF, STOP1, STOP2, STOP3, RUNNING
+        POWER_OFF, STOP1, STOP2, STOP3, WAITING, RUNNING
     } state;                    ///< the run-state of the state machine
+    long cycle_count;           ///< how many cycles have been consumed
     short offset;               ///< position within an op under decode
     struct {
         uint8_t  A;             ///< accumulator

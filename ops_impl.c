@@ -38,6 +38,7 @@ static int _decode_addrs(hc_state_t *state, const struct opinfo *info,
         case MODE_IX2 :
             *from = state->regs.HX.word;
             switch (mode) {
+                /// @todo FIXME this increment happens too early
                 case MODE_IXP : state->regs.HX.word++;
                 case MODE_IX1P: if (mode != MODE_IX1P) break;
                 case MODE_IX1 : *from += state->mem[pos];       break;
@@ -345,6 +346,22 @@ int _handle_op_BSET_BCLR(hc_state_t *state, const struct opinfo *info)
 #pragma weak handle_op_BCLR6 = _handle_op_BSET_BCLR
 #pragma weak handle_op_BCLR7 = _handle_op_BSET_BCLR
 
+int _handle_op_CBEQ_CBEQA_CBEQX(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    /// @todo implement
+
+    return rc;
+}
+
+#pragma weak handle_op_CBEQ  = _handle_op_CBEQ_CBEQA_CBEQX
+#pragma weak handle_op_CBEQA = _handle_op_CBEQ_CBEQA_CBEQX
+#pragma weak handle_op_CBEQX = _handle_op_CBEQ_CBEQA_CBEQX
+
 int handle_op_CLC(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
@@ -423,18 +440,40 @@ int _handle_op_COM_COMA_COMX(hc_state_t *state, const struct opinfo *info)
 #pragma weak handle_op_COMA = _handle_op_COM_COMA_COMX
 #pragma weak handle_op_COMX = _handle_op_COM_COMA_COMX
 
+int handle_op_CPHX(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    addr_t addr;
+    _decode_addrs(state, info, &addr, NULL);
+
+    uint16_t h  = state->regs.HX.bytes.H;
+    uint16_t hx = state->regs.HX.word;
+    uint16_t m  = WORD(state->mem[addr]);
+
+    uint16_t r = hx - m;
+
+    state->regs.CCR.bits.C = m > hx;
+    state->regs.CCR.bits.N = CHECK_MSB(r);
+    state->regs.CCR.bits.V = ( (h & 0x80) && !(m & 0x8000) && !(r & 0x8000)) ||
+                             (!(h & 0x80) &&  (m & 0x8000) &&  (r & 0x8000));
+    state->regs.CCR.bits.Z = r == 0;
+
+    return rc;
+}
+
 int handle_op_DAA(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
     /// @note From Table A-2 in the HCS08 Family Reference Manual
     static const struct {
-        uint8_t iC;
-        uint8_t iLoTopA, iHiTopA;
-        uint8_t iH;
-        uint8_t iLoBotA, iHiBotA;
-        uint8_t factor;
-        uint8_t oC;
+        uint8_t iC;                 ///< input carry
+        uint8_t iLoTopA, iHiTopA;   ///< bounds for high nybble of A
+        uint8_t iH;                 ///< input H flag
+        uint8_t iLoBotA, iHiBotA;   ///< bounds for low nybble of A
+        uint8_t factor;             ///< correction factor to add to A
+        uint8_t oC;                 ///< output carry
     } t[] = {
         { 0, 0x0, 0x9, 0, 0x0, 0x9, 0x00, 0 },
         { 0, 0x0, 0x8, 0, 0xA, 0xF, 0x06, 0 },
@@ -778,6 +817,16 @@ int handle_op_NOP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
+int handle_op_NSA(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    state->regs.A = (state->regs.A >> 4) |
+                    (state->regs.A << 4);
+
+    return rc;
+}
+
 int _handle_op_PSH(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
@@ -829,6 +878,19 @@ int handle_op_RSP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
+int handle_op_RTI(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    _pull(state, &state->regs.CCR.byte);
+    _pull(state, &state->regs.A);
+    _pull(state, &state->regs.HX.bytes.X);
+    _pull(state, &state->regs.PC.bytes.PCH);
+    _pull(state, &state->regs.PC.bytes.PCL);
+
+    return rc;
+}
+
 int handle_op_RTS(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
@@ -839,7 +901,7 @@ int handle_op_RTS(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_SBC_SUB_CMP(hc_state_t *state, const struct opinfo *info)
+int _handle_op_SBC_SUB_CMP_CPX(hc_state_t *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -848,25 +910,36 @@ int _handle_op_SBC_SUB_CMP(hc_state_t *state, const struct opinfo *info)
 
     enum op op = info->type;
 
-    uint8_t o = state->regs.A;
-    uint8_t m = state->mem[addr];
-    uint8_t r = state->regs.A - m;
+    bool compare_only = (op == OP_CMP || op == OP_CPX);
+    uint8_t *r;
+    switch (op) {
+        case OP_SBC:
+        case OP_SUB:
+        case OP_CMP: r = &state->regs.A;          break;
+        case OP_CPX: r = &state->regs.HX.bytes.X; break;
+        default: break;
+    }
 
-    if (op != OP_CMP) r = state->regs.A -= m;
-    if (op == OP_SBC) r = state->regs.A -= state->regs.CCR.bits.C;
+    uint8_t o = *r;
+    uint8_t m = state->mem[addr];
+    uint8_t t = (*r) - m;
+
+    if (!compare_only) t = (*r) -= m;
+    if (op == OP_SBC ) t = (*r) -= state->regs.CCR.bits.C;
 
     state->regs.CCR.bits.C = state->mem[addr] > o;
-    state->regs.CCR.bits.N = CHECK_MSB(r);
-    state->regs.CCR.bits.V = ( (o & 0x80) && !(m & 0x80) && !(r & 0x80)) ||
-                             (!(o & 0x80) &&  (m & 0x80) &&  (r & 0x80));
-    state->regs.CCR.bits.Z = r == 0;
+    state->regs.CCR.bits.N = CHECK_MSB(t);
+    state->regs.CCR.bits.V = ( (o & 0x80) && !(m & 0x80) && !(t & 0x80)) ||
+                             (!(o & 0x80) &&  (m & 0x80) &&  (t & 0x80));
+    state->regs.CCR.bits.Z = t == 0;
 
     return rc;
 }
 
-#pragma weak handle_op_SBC = _handle_op_SBC_SUB_CMP
-#pragma weak handle_op_SUB = _handle_op_SBC_SUB_CMP
-#pragma weak handle_op_CMP = _handle_op_SBC_SUB_CMP
+#pragma weak handle_op_SBC = _handle_op_SBC_SUB_CMP_CPX
+#pragma weak handle_op_SUB = _handle_op_SBC_SUB_CMP_CPX
+#pragma weak handle_op_CMP = _handle_op_SBC_SUB_CMP_CPX
+#pragma weak handle_op_CPX = _handle_op_SBC_SUB_CMP_CPX
 
 int handle_op_SEC(hc_state_t *state, const struct opinfo *info)
 {
@@ -882,6 +955,16 @@ int handle_op_SEI(hc_state_t *state, const struct opinfo *info)
     int rc = 0;
 
     state->regs.CCR.bits.I = 1;
+
+    return rc;
+}
+
+int handle_op_STOP(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    state->regs.CCR.bits.I = 0;
+    state->state = STOP3; /// @todo make configurable
 
     return rc;
 }
@@ -979,6 +1062,16 @@ int handle_op_TXS(hc_state_t *state, const struct opinfo *info)
     int rc = 0;
 
     state->regs.SP.word = state->regs.HX.word - 1;
+
+    return rc;
+}
+
+int handle_op_WAIT(hc_state_t *state, const struct opinfo *info)
+{
+    int rc = 0;
+
+    state->regs.CCR.bits.I = 0;
+    state->state = WAITING;
 
     return rc;
 }

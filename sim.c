@@ -31,7 +31,8 @@ int loop_iterate(struct sim_state *st)
 {
     int rc = 0;
 
-    hc_do_op(&st->hc_state);
+    if (st->hc_state.state == RUNNING)
+        hc_do_op(&st->hc_state);
 
     return rc;
 }
