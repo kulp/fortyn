@@ -157,24 +157,22 @@ const char *opnames[] = {
 int opnames_size = countof(opnames);
 
 const char *modenames[] = {
-#define NAMED(X) [MODE_##X] = #X
-    NAMED(DD),
-    NAMED(DIR),
-    NAMED(DIXP),
-    NAMED(EXT),
-    NAMED(IMD),
-    NAMED(IMM),
-    NAMED(INH),
-    NAMED(IX),
-    NAMED(IXP),
-    NAMED(IXPD),
-    NAMED(IX1),
-    NAMED(IX1P),
-    NAMED(IX2),
-    NAMED(REL),
-    NAMED(SP1),
-    NAMED(SP2)
-#undef NAMED
+    [MODE_DD  ] = "DD",
+    [MODE_DIR ] = "DIR",
+    [MODE_DIXP] = "DIX+",
+    [MODE_EXT ] = "EXT",
+    [MODE_IMD ] = "IMD",
+    [MODE_IMM ] = "IMM",
+    [MODE_INH ] = "INH",
+    [MODE_IX  ] = "IX",
+    [MODE_IXP ] = "IX+",
+    [MODE_IXPD] = "IX+D",
+    [MODE_IX1 ] = "IX1",
+    [MODE_IX1P] = "IX1+",
+    [MODE_IX2 ] = "IX2",
+    [MODE_REL ] = "REL",
+    [MODE_SP1 ] = "SP1",
+    [MODE_SP2 ] = "SP2"
 };
 
 int modenames_size = countof(modenames);

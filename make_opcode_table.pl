@@ -178,9 +178,10 @@ const char *opnames[] = {
 int opnames_size = countof(opnames);
 
 const char *modenames[] = {
-#define NAMED(X) [MODE_##X] = #X
-    @{ [ join ",\n    ", map { "NAMED(" . legalize($_) . ")" } sort(keys %modes) ] }
-#undef NAMED
+    @{ [
+        join ",\n    ", map {
+            sprintf "[MODE_%-${w1}s] = \"%s\"", legalize($_), $_
+        } sort(keys %modes) ] }
 };
 
 int modenames_size = countof(modenames);
