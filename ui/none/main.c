@@ -54,3 +54,6 @@ int main(int argc, char *argv[])
     return rc;
 }
 
+/* vi:set ts=4 sw=4 et: */
+/* vim:set syntax=c.doxygen: */
+

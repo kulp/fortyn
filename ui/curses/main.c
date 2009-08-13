@@ -6,6 +6,8 @@
 #include <limits.h>
 #include <getopt.h>
 
+#define EXIT_PROGRAM    2
+
 struct curses_data {
     int rows, cols;
 };
@@ -52,15 +54,6 @@ int screen_iterate(struct sim_state *state)
     char ccr[CHAR_BIT + 1];
     tobin(hc->regs.CCR.byte, ccr);
 
-    mvprintw(row++, 0, "PC : 0x%x", hc->regs.PC.word);
-    mvprintw(row++, 0, "SP : 0x%x", hc->regs.SP.word);
-    mvprintw(row++, 0, "CCR: 0b%s", ccr);
-    mvprintw(row++, 0, "       V__HINZC");
-    mvprintw(row++, 0, "A  : 0x%x", hc->regs.A);
-    mvprintw(row++, 0, "H  : 0x%x", hc->regs.HX.bytes.H);
-    mvprintw(row++, 0, "X  : 0x%x", hc->regs.HX.bytes.X);
-    row++;
-
     int page = hc_op_page(hc);
     addr_t pc = hc->regs.PC.word;
     int pre = pages[page].prebyte_cnt;
@@ -68,17 +61,34 @@ int screen_iterate(struct sim_state *state)
 
     // clear line
     mvprintw(row, 0, "                                               ");
-    mvprintw(row++, 0, "Instruction: %s", opnames[info->type]);
+    mvprintw(row++, 0, "PC : 0x%02x (%s", hc->regs.PC.word, opnames[info->type]);
 
     for (addr_t i = pre + 1; i < info->bytes; i++)
         printw(" 0x%02x", hc->mem[pc + i]);
 
+    printw(")");
+
+    mvprintw(row++, 0, "SP : 0x%02x", hc->regs.SP.word);
+    mvprintw(row++, 0, "CCR: 0b%s", ccr);
+    mvprintw(row++, 7,        "V__HINZC");
+    mvprintw(row++, 0, "A  : 0x%02x", hc->regs.A);
+    mvprintw(row++, 0, "H  : 0x%02x", hc->regs.HX.bytes.H);
+    mvprintw(row++, 0, "X  : 0x%02x", hc->regs.HX.bytes.X);
     move(row++,0);
 
-    // wait for user input
-    getch();
+    refresh();
 
-    rc = loop_iterate(state);
+    // wait for user input
+    int ch = getch();
+    switch (ch) {
+        case 'n':
+        case 's':
+            rc = loop_iterate(state);
+            break;
+        case 'q':
+            return EXIT_PROGRAM;
+        default: break; /// @todo handle better
+    }
 
     return rc;
 }
@@ -122,11 +132,14 @@ int main(int argc, char *argv[])
 
     state.uidata = &uidata;
 
-    while (state.running)
+    while (state.running && rc != EXIT_PROGRAM)
         rc = screen_iterate(&state);
 
-    refresh();
     endwin();
 
     return rc;
 }
+
+/* vi:set ts=4 sw=4 et: */
+/* vim:set syntax=c.doxygen: */
+
