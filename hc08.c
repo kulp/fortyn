@@ -39,14 +39,6 @@ int hc_do_reset(hc_state_t *st)
     return rc;
 }
 
-/**
- * Determine which op page the operation at the current PC belongs to.
- *
- * @param st the processor state, which holds the PC and instruction to be
- * decoded at st->mem[st->regs.PC.word]
- *
- * @return the page number. No error conditions can be reported.
- */
 int hc_op_page(hc_state_t *st)
 {
     int rc = 0; // default page is zero, the no-prefix page

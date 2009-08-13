@@ -1,15 +1,21 @@
 HC_MODEL ?= MC9S08GB60A
 CFILES = $(wildcard *.c)
 DEFINES += _LITTLE_ENDIAN
+INCLUDE += .
+
+UIS = $(patsubst %.c,%,$(wildcard ui/*/main.c))
 
 override CFLAGS += -g -std=c99 -W -Wall -pedantic-errors #-Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
-all: sim
+override CFLAGS += $(patsubst %,-I%,$(INCLUDE))
+all: $(UIS)
+
+ui/curses/main: LDLIBS += -lncurses
 
 # Ordering is important here: there may be multiple weak definitions of any
 # particular op handler, and in such a case the first definition is taken (which
 # should not be the default handler from ops.o).
-sim: hc08.o ops_impl.o ops.o 
+$(UIS): sim.o hc08.o ops_impl.o ops.o 
 
 ops_impl.o: CFLAGS += -Wno-unused-parameter
 

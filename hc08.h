@@ -115,6 +115,16 @@ static inline void hc_error(const char *fmt, ...)
     abort();
 }
 
+/**
+ * Determine which op page the operation at the current PC belongs to.
+ *
+ * @param st the processor state, which holds the PC and instruction to be
+ * decoded at st->mem[st->regs.PC.word]
+ *
+ * @return the page number. No error conditions can be reported.
+ */
+int hc_op_page(hc_state_t *st);
+
 #endif
 
 /* vi:set ts=4 sw=4 et: */
