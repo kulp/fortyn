@@ -541,7 +541,7 @@ int _handle_op_DBNZ_DBNZA_DBNZX(hc_state_t *state, const struct opinfo *info)
         default: break;
     }
 
-    if ((*r)-- != 0) {
+    if (--(*r) != 0) {
         int8_t rel = state->mem[pos];
         state->regs.PC.word = pc + rel;
     }

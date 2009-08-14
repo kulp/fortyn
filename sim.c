@@ -13,12 +13,12 @@
 #include <string.h>
 #include <unistd.h>
 
-int loop_iterate(struct sim_state *st)
+int loop_iterate(struct sim_state *state)
 {
     int rc = 0;
 
-    if (st->hc_state.state == RUNNING)
-        hc_do_op(&st->hc_state);
+    if (state->hc_state.state == RUNNING)
+        hc_do_op(&state->hc_state);
 
     return rc;
 }
