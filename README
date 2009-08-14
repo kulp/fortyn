@@ -1,0 +1,37 @@
+fortyn ("fourteen") is a simulator for the Freescale (formerly Motorola)
+HC08 family (and possibly compatible families) of 8-bit
+microcontrollers.
+
+This project was undertaken as a hobby project, and was not designed to
+fill a particular need. However, if you find it useful in any way, I
+would be delighted to hear about it.
+
+As a hobby project undertaken without planning, it has few design
+principles besides a general desire to make the system modular,
+minimal, and flexible. Heavy use was made of code generation (the
+Makefile, coupled with the tools/make_opcode_table.pl script, will build
+the ops.c and ops.h files from a PDF specification if they do not
+exist), and framework remains in place for producing a list of
+unimplemented operations and for defaulting to no operation for
+unimplemented ops. This means it should be fairly easy to add extended
+ISA support.
+
+Several UIs exist, with each starting in ui/[name]/main.c. This
+code represents my first experimentation with [n]curses, so please
+do not take the (minimal) example there are a sample of excellent
+curses coding.
+
+The simulator has not yet been fully tested -- not all of its operations
+have even been run. Eventually I would like to have a test suite or
+another way to compare its behavior to that of a known-good simulator,
+but I make no promises thereto.
+
+The name "fortyn" is a corruption of "fourteen," which is the english
+spelling of the concatenation of the digits 1 and 4, which can be
+represented in Japanese by the sounds "ichi" and "shi," which sound
+superficially like the letters H and C in English, which constitute part
+of the name of the simulated family of microcontrollers.
+
+Darren Kulp
+2009-08-13
+
