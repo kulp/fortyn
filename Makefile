@@ -1,9 +1,12 @@
 HC_MODEL ?= MC9S08GB60A
-CFILES = $(wildcard *.c)
+CFILES = $(wildcard src/*.c)
 DEFINES += _LITTLE_ENDIAN
-INCLUDE += .
+INCLUDE += . src
 
 UIS = $(patsubst %.c,%,$(wildcard ui/*/main.c))
+
+vpath %.h src
+vpath %.c src
 
 override CFLAGS += -g -std=c99 -W -Wall -pedantic-errors #-Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
@@ -23,9 +26,10 @@ CLEANFILES += sim
 
 CLOBBERFILES += ops.h ops.c
 
-ops.c ops.h: $(HC_MODEL).txt ./make_opcode_table.pl
+ops.c ops.h: $(HC_MODEL).txt ./tools/make_opcode_table.pl
 	perl -ne 'print if /Opcode Map/.../Opcode Map/' $< | \
-		./make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c $(basename $@).c
+		./tools/make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c \
+			$(basename $@).c
 
 .SECONDARY: $(HC_MODEL).txt
 CLOBBERFILES += $(HC_MODEL).txt
@@ -36,7 +40,7 @@ CLOBBERFILES += $(HC_MODEL).pdf
 $(HC_MODEL).pdf:
 	wget http://www.freescale.com/files/microcontrollers/doc/data_sheet/$(notdir $@)
 
-CLEANFILES += *.[od]
+CLEANFILES += *.o src/*.d
 .PHONY: clean clobber todo
 clean:
 	-rm -rf $(CLEANFILES)
