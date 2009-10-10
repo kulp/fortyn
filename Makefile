@@ -1,6 +1,5 @@
 HC_MODEL ?= MC9S08GB60A
 CFILES = $(wildcard src/*.c)
-DEFINES += _LITTLE_ENDIAN
 INCLUDE += . src
 
 UIS = $(patsubst %.c,%,$(wildcard ui/*/main.c))
@@ -26,10 +25,11 @@ CLEANFILES += sim
 
 CLOBBERFILES += ops.h ops.c
 
-ops.c ops.h: $(HC_MODEL).txt ./tools/make_opcode_table.pl
+src/ops.h: src/ops.c ; $(NOOP)
+src/ops.c: $(HC_MODEL).txt ./tools/make_opcode_table.pl
 	perl -ne 'print if /Opcode Map/.../Opcode Map/' $< | \
-		./tools/make_opcode_table.pl -b $(basename $@) -h $(basename $@).h -c \
-			$(basename $@).c
+		./tools/make_opcode_table.pl -d $(dir $@) -b $(notdir $(basename $@)) \
+			-h $(notdir $(basename $@)).h -c $(notdir $(basename $@)).c
 
 .SECONDARY: $(HC_MODEL).txt
 CLOBBERFILES += $(HC_MODEL).txt
