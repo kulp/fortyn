@@ -4,15 +4,16 @@ use Getopt::Std;
 use List::Util qw(max);
 
 my %opts;
-getopt('bch', \%opts);
+getopt('bcdh', \%opts);
 my $base = $opts{b} || "opcodes";
+my $dir  = $opts{d} || ".";
 my $cfile = $opts{c}
     or die "No -c FILE option provided (output filename.c)";
 my $hfile = $opts{h}
     or die "No -h FILE option provided (output filename.h)";
 
-open my $c, ">", $cfile;
-open my $h, ">", $hfile;
+open my $c, ">", "$dir/$cfile";
+open my $h, ">", "$dir/$hfile";
 
 my @ops;
 my %ops;
@@ -241,7 +242,7 @@ const struct opinfo opinfos[${\ scalar @pages}][256] = {
             "[$_->{index}] = {\n        " .
                 (join ",\n        ", map { sprintf
                     "[0x%02X] = " .
-                    "{ OP_%-${w0}s, MODE_%-${w1}s, 0x%02X, %u, %${w3}u }",
+                    "{ OP_%-${w0}s, MODE_%-${w1}s, 0x%02X, %${w2}u, %${w3}u }",
                         map { legalize $_ }
                             @{$_}{qw(opcode type mode opcode bytes cycles)}
                 } @{ $ops[$_->{index}] }) .
