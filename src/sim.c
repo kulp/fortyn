@@ -34,7 +34,7 @@ int load_binary_file(struct sim_state *state, const char *filename)
     unsigned int pos = 0;
 
     while ((bytes = read(fd, buf, sizeof buf)) > 0) {
-        if (pos + bytes > sizeof state->hc_state.mem) {
+        if (pos + bytes > (signed)sizeof state->hc_state.mem) {
             fprintf(stderr, "Input file size exceeds memory size\n");
             goto cleanup;
         }
