@@ -2,7 +2,7 @@
 #include <getopt.h>
 
 static const struct option longopts[] = {
-    { "help" , required_argument, NULL, 'h' },
+    { "help" ,       no_argument, NULL, 'h' },
     { "image", required_argument, NULL, 'i' },
     { NULL, 0, NULL, 0 },
 };
