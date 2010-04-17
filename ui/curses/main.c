@@ -33,10 +33,10 @@ int reload(struct sim_state *state)
     hc_state_init(&state->hc_state);
     hc_do_reset(&state->hc_state);
 
-    struct curses_data *uidata = state->uidata;
+    struct curses_data *uidata = state->ui.data;
     uidata->stepping = true;
 
-    state->uiup(state);
+    state->ui.up(state);
 
     return rc;
 }
@@ -93,7 +93,7 @@ int screen_update(struct sim_state *state)
     int rc = 0;
 
     hc_state_t *hc = &state->hc_state;
-    //struct curses_data *uidata = state->uidata;
+    //struct curses_data *uidata = state->ui.data;
 
     int row = 0;
 
@@ -131,7 +131,7 @@ int loop_continue(struct sim_state *state)
 {
     int rc = 0;
 
-    struct curses_data *uidata = state->uidata;
+    struct curses_data *uidata = state->ui.data;
     uidata->stepping = false;
 
     return rc;
@@ -152,7 +152,7 @@ int screen_get_action(struct sim_state *state)
 {
     int rc = 0;
 
-    struct curses_data *uidata = state->uidata;
+    struct curses_data *uidata = state->ui.data;
 
     if (uidata->stepping || should_break(state)) {
         uidata->stepping = true;
@@ -184,8 +184,10 @@ int main(int argc, char *argv[])
     struct sim_state state = {
         .loaded  = false,
         .running = true,
-        .uiup    = screen_update,
-        .uiinput = screen_get_action,
+        .ui = {
+            .up    = screen_update,
+            .input = screen_get_action,
+        },
     };
 
     extern char *optarg;
@@ -208,7 +210,7 @@ int main(int argc, char *argv[])
     struct curses_data uidata = { 0, 0, true };
     getmaxyx(stdscr,uidata.rows,uidata.cols);
 
-    state.uidata = &uidata;
+    state.ui.data = &uidata;
 
     rc = reload(&state);
 
@@ -218,8 +220,8 @@ int main(int argc, char *argv[])
     }
 
     while (state.running && rc != EXIT_PROGRAM) {
-        rc = state.uiup(&state);
-        rc = state.uiinput(&state);
+        rc = state.ui.up(&state);
+        rc = state.ui.input(&state);
     }
 
     endwin();
