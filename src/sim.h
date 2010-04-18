@@ -20,21 +20,18 @@ struct sim_state {
         int (*up)(sstate_t*);       ///< function to update UI
         void *data;                 ///< UI-specific data store
     } ui;
-    char memfile[200];              ///< name of loaded memory-contents file
+    char *memfile;                  ///< name of loaded memory-contents file
 };
 
 int load_binary_file(struct sim_state *state, const char *filename);
 int loop_iterate(struct sim_state *state);
 int loop_continue(struct sim_state *state);
 
-/// @todo don't use an enum for bitfields
-enum hook_op {
-    HOOK_OP_NOP   =  1,
-    HOOK_OP_READ  =  2,
-    HOOK_OP_WRITE =  4,
-    HOOK_OP_JUMP  =  8,
-    HOOK_OP_OTHER = 16,
-};
+#define HOOK_OP_NOP   (1UL << 0)
+#define HOOK_OP_READ  (1UL << 1)
+#define HOOK_OP_WRITE (1UL << 2)
+#define HOOK_OP_JUMP  (1UL << 3)
+#define HOOK_OP_OTHER (1UL << 4)
 
 typedef int (*subop_hook_t)(
     sstate_t *state,
