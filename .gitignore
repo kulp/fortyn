@@ -7,3 +7,4 @@ sim
 .*.sw?
 *.bin
 *.s19
+ui/*/main
