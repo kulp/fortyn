@@ -3,6 +3,7 @@ CFILES = $(wildcard src/*.c)
 INCLUDE += . src
 
 UIS = $(patsubst %.c,%,$(wildcard ui/*/main.c))
+CLEANFILES += $(UIS)
 
 vpath %.h src
 vpath %.c src
@@ -10,7 +11,17 @@ vpath %.c src
 override CFLAGS += -g -std=c99 -W -Wall -Wextra -pedantic-errors -Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 override CFLAGS += $(patsubst %,-I%,$(INCLUDE))
+
 all: $(UIS)
+
+SUBDIRS = t
+.PHONY: all check subdirs $(SUBDIRS)
+subdirs: $(SUBDIRS)
+$(SUBDIRS):
+	$(MAKE) -C $@ $(MAKECMDGOALS)
+
+check:
+	$(MAKE) -C t run
 
 ui/curses/main: LDLIBS += -lncurses
 
@@ -40,10 +51,10 @@ $(HC_MODEL).pdf:
 
 CLEANFILES += *.o src/*.d
 .PHONY: clean clobber todo
-clean:
+clean: subdirs
 	-rm -rf $(CLEANFILES)
 
-clobber: clean
+clobber: clean subdirs
 	-rm -rf $(CLOBBERFILES)
 
 %.bin: %.s19

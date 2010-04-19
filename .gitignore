@@ -8,3 +8,4 @@ sim
 *.bin
 *.s19
 ui/*/main
+t/check
