@@ -38,16 +38,18 @@ static int _decode_addrs(hc_state_t *state, const struct opinfo *info,
         case MODE_IX2 :
             *from = state->regs.HX.word;
             switch (mode) {
-                case MODE_IXP : state->regs.HX.word++;
-                case MODE_IX1P: if (mode != MODE_IX1P) break;
+                case MODE_IXP : state->regs.HX.word++;          /* FALLTHROUGH */
+                case MODE_IX1P: if (mode != MODE_IX1P) break;   /* FALLTHROUGH */
                 case MODE_IX1 : *from += state->mem[pos];       break;
                 case MODE_IX2 : *from += WORD(state->mem[pos]); break;
                 default: break;
             }
             break;
 
-        case MODE_IXPD: hc_error("Unimplemented mode IX+/D"); /// @todo
-        case MODE_DIXP: hc_error("Unimplemented mode D/IX+"); /// @todo
+        case MODE_IXPD:
+            *from = state->regs.HX.word++; *to = state->mem[pos]; break;
+        case MODE_DIXP:
+            *from = state->mem[pos]; *to = state->regs.HX.word++; break;
 
         case MODE_DD  : *from = state->mem[pos++]; *to = state->mem[pos]; break;
         case MODE_IMD : *from =            pos++ ; *to = state->mem[pos]; break;
@@ -244,7 +246,7 @@ int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
         case OP_BHCS: cond ^= h;                break;
 
         case OP_BIL : cond ^= 1; /* FALLTHROUGH */
-        case OP_BIH : cond ^= 0; /** @todo */   break;
+        case OP_BIH : cond ^= HC08_IRQ_STATE;   break;
 
         case OP_BRN : cond ^= 1; /* FALLTHROUGH */
         case OP_BRA : cond ^= 1;                break;

@@ -36,8 +36,11 @@
 #define CHECK_HALF_CARRY(a,m,c) \
     ((((a) & 0xF) + ((m) & 0xF) + (c)) & (1 << 4))
 
-#define CHECK_MSB(r)    (!!((r) & (1 << (8 * sizeof r - 1))))
-#define CHECK_CARRY(r)  (!!((r) & (1 << (8 * sizeof r    ))))
+#define CHECK_MSB(r)    (!!((r) & (1 << (8 * (sizeof (r)) - 1))))
+#define CHECK_CARRY(r)  (!!((r) & (1 << (8 * (sizeof (r))    ))))
+
+/** @todo */
+#define HC08_IRQ_STATE 0
 
 typedef uint16_t addr_t;
 

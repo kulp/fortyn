@@ -7,7 +7,7 @@ UIS = $(patsubst %.c,%,$(wildcard ui/*/main.c))
 vpath %.h src
 vpath %.c src
 
-override CFLAGS += -g -std=c99 -W -Wall -pedantic-errors #-Werror
+override CFLAGS += -g -std=c99 -W -Wall -Wextra -pedantic-errors -Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 override CFLAGS += $(patsubst %,-I%,$(INCLUDE))
 all: $(UIS)
@@ -21,9 +21,7 @@ $(UIS): sim.o hc08.o ops_impl.o ops.o
 
 ops_impl.o: CFLAGS += -Wno-unused-parameter
 
-CLEANFILES += sim
-
-CLOBBERFILES += ops.h ops.c
+CLOBBERFILES += src/ops.[ch]
 
 src/ops.h: src/ops.c ; $(NOOP)
 src/ops.c: $(HC_MODEL).txt ./tools/make_opcode_table.pl
@@ -36,7 +34,7 @@ CLOBBERFILES += $(HC_MODEL).txt
 $(HC_MODEL).txt: $(HC_MODEL).pdf
 	pdftotext -raw $< $@
 
-CLOBBERFILES += $(HC_MODEL).pdf
+#CLOBBERFILES += $(HC_MODEL).pdf
 $(HC_MODEL).pdf:
 	wget http://www.freescale.com/files/microcontrollers/doc/data_sheet/$(notdir $@)
 
@@ -47,10 +45,6 @@ clean:
 
 clobber: clean
 	-rm -rf $(CLOBBERFILES)
-
-todo:
-	@-UNHANDLED=$$(nm sim | grep UNHANDLED | cut -d' ' -f1); \
-	nm sim | grep handle_op | grep $$UNHANDLED | cut -d_ -f3 |grep -v UNHANDLED
 
 %.bin: %.s19
 	srec_cat -Output $@ -Binary $< -Motorola
