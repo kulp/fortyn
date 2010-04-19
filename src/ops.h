@@ -9,6 +9,151 @@
 #define countof(X) (sizeof (X) / sizeof (X)[0])
 #endif
 
+#define OPS_   \
+    R_(ADC)    \
+    R_(ADD)    \
+    R_(AIS)    \
+    R_(AIX)    \
+    R_(AND)    \
+    R_(ASR)    \
+    R_(ASRA)   \
+    R_(ASRX)   \
+    R_(BCC)    \
+    R_(BCLR0)  \
+    R_(BCLR1)  \
+    R_(BCLR2)  \
+    R_(BCLR3)  \
+    R_(BCLR4)  \
+    R_(BCLR5)  \
+    R_(BCLR6)  \
+    R_(BCLR7)  \
+    R_(BCS)    \
+    R_(BEQ)    \
+    R_(BGE)    \
+    R_(BGND)   \
+    R_(BGT)    \
+    R_(BHCC)   \
+    R_(BHCS)   \
+    R_(BHI)    \
+    R_(BIH)    \
+    R_(BIL)    \
+    R_(BIT)    \
+    R_(BLE)    \
+    R_(BLS)    \
+    R_(BLT)    \
+    R_(BMC)    \
+    R_(BMI)    \
+    R_(BMS)    \
+    R_(BNE)    \
+    R_(BPL)    \
+    R_(BRA)    \
+    R_(BRCLR0) \
+    R_(BRCLR1) \
+    R_(BRCLR2) \
+    R_(BRCLR3) \
+    R_(BRCLR4) \
+    R_(BRCLR5) \
+    R_(BRCLR6) \
+    R_(BRCLR7) \
+    R_(BRN)    \
+    R_(BRSET0) \
+    R_(BRSET1) \
+    R_(BRSET2) \
+    R_(BRSET3) \
+    R_(BRSET4) \
+    R_(BRSET5) \
+    R_(BRSET6) \
+    R_(BRSET7) \
+    R_(BSET0)  \
+    R_(BSET1)  \
+    R_(BSET2)  \
+    R_(BSET3)  \
+    R_(BSET4)  \
+    R_(BSET5)  \
+    R_(BSET6)  \
+    R_(BSET7)  \
+    R_(BSR)    \
+    R_(CBEQ)   \
+    R_(CBEQA)  \
+    R_(CBEQX)  \
+    R_(CLC)    \
+    R_(CLI)    \
+    R_(CLR)    \
+    R_(CLRA)   \
+    R_(CLRH)   \
+    R_(CLRX)   \
+    R_(CMP)    \
+    R_(COM)    \
+    R_(COMA)   \
+    R_(COMX)   \
+    R_(CPHX)   \
+    R_(CPX)    \
+    R_(DAA)    \
+    R_(DBNZ)   \
+    R_(DBNZA)  \
+    R_(DBNZX)  \
+    R_(DEC)    \
+    R_(DECA)   \
+    R_(DECX)   \
+    R_(DIV)    \
+    R_(EOR)    \
+    R_(INC)    \
+    R_(INCA)   \
+    R_(INCX)   \
+    R_(JMP)    \
+    R_(JSR)    \
+    R_(LDA)    \
+    R_(LDHX)   \
+    R_(LDX)    \
+    R_(LSL)    \
+    R_(LSLA)   \
+    R_(LSLX)   \
+    R_(LSR)    \
+    R_(LSRA)   \
+    R_(LSRX)   \
+    R_(MOV)    \
+    R_(MUL)    \
+    R_(NEG)    \
+    R_(NEGA)   \
+    R_(NEGX)   \
+    R_(NOP)    \
+    R_(NSA)    \
+    R_(ORA)    \
+    R_(PSHA)   \
+    R_(PSHH)   \
+    R_(PSHX)   \
+    R_(PULA)   \
+    R_(PULH)   \
+    R_(PULX)   \
+    R_(ROL)    \
+    R_(ROLA)   \
+    R_(ROLX)   \
+    R_(ROR)    \
+    R_(RORA)   \
+    R_(RORX)   \
+    R_(RSP)    \
+    R_(RTI)    \
+    R_(RTS)    \
+    R_(SBC)    \
+    R_(SEC)    \
+    R_(SEI)    \
+    R_(STA)    \
+    R_(STHX)   \
+    R_(STOP)   \
+    R_(STX)    \
+    R_(SUB)    \
+    R_(SWI)    \
+    R_(TAP)    \
+    R_(TAX)    \
+    R_(TPA)    \
+    R_(TST)    \
+    R_(TSTA)   \
+    R_(TSTX)   \
+    R_(TSX)    \
+    R_(TXA)    \
+    R_(TXS)    \
+    R_(WAIT)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type definitions
 ////////////////////////////////////////////////////////////////////////////////
@@ -16,149 +161,9 @@
 /// Distinct operations (not literal values)
 enum op {
     OP_INVALID,
-    OP_ADC,
-    OP_ADD,
-    OP_AIS,
-    OP_AIX,
-    OP_AND,
-    OP_ASR,
-    OP_ASRA,
-    OP_ASRX,
-    OP_BCC,
-    OP_BCLR0,
-    OP_BCLR1,
-    OP_BCLR2,
-    OP_BCLR3,
-    OP_BCLR4,
-    OP_BCLR5,
-    OP_BCLR6,
-    OP_BCLR7,
-    OP_BCS,
-    OP_BEQ,
-    OP_BGE,
-    OP_BGND,
-    OP_BGT,
-    OP_BHCC,
-    OP_BHCS,
-    OP_BHI,
-    OP_BIH,
-    OP_BIL,
-    OP_BIT,
-    OP_BLE,
-    OP_BLS,
-    OP_BLT,
-    OP_BMC,
-    OP_BMI,
-    OP_BMS,
-    OP_BNE,
-    OP_BPL,
-    OP_BRA,
-    OP_BRCLR0,
-    OP_BRCLR1,
-    OP_BRCLR2,
-    OP_BRCLR3,
-    OP_BRCLR4,
-    OP_BRCLR5,
-    OP_BRCLR6,
-    OP_BRCLR7,
-    OP_BRN,
-    OP_BRSET0,
-    OP_BRSET1,
-    OP_BRSET2,
-    OP_BRSET3,
-    OP_BRSET4,
-    OP_BRSET5,
-    OP_BRSET6,
-    OP_BRSET7,
-    OP_BSET0,
-    OP_BSET1,
-    OP_BSET2,
-    OP_BSET3,
-    OP_BSET4,
-    OP_BSET5,
-    OP_BSET6,
-    OP_BSET7,
-    OP_BSR,
-    OP_CBEQ,
-    OP_CBEQA,
-    OP_CBEQX,
-    OP_CLC,
-    OP_CLI,
-    OP_CLR,
-    OP_CLRA,
-    OP_CLRH,
-    OP_CLRX,
-    OP_CMP,
-    OP_COM,
-    OP_COMA,
-    OP_COMX,
-    OP_CPHX,
-    OP_CPX,
-    OP_DAA,
-    OP_DBNZ,
-    OP_DBNZA,
-    OP_DBNZX,
-    OP_DEC,
-    OP_DECA,
-    OP_DECX,
-    OP_DIV,
-    OP_EOR,
-    OP_INC,
-    OP_INCA,
-    OP_INCX,
-    OP_JMP,
-    OP_JSR,
-    OP_LDA,
-    OP_LDHX,
-    OP_LDX,
-    OP_LSL,
-    OP_LSLA,
-    OP_LSLX,
-    OP_LSR,
-    OP_LSRA,
-    OP_LSRX,
-    OP_MOV,
-    OP_MUL,
-    OP_NEG,
-    OP_NEGA,
-    OP_NEGX,
-    OP_NOP,
-    OP_NSA,
-    OP_ORA,
-    OP_PSHA,
-    OP_PSHH,
-    OP_PSHX,
-    OP_PULA,
-    OP_PULH,
-    OP_PULX,
-    OP_ROL,
-    OP_ROLA,
-    OP_ROLX,
-    OP_ROR,
-    OP_RORA,
-    OP_RORX,
-    OP_RSP,
-    OP_RTI,
-    OP_RTS,
-    OP_SBC,
-    OP_SEC,
-    OP_SEI,
-    OP_STA,
-    OP_STHX,
-    OP_STOP,
-    OP_STX,
-    OP_SUB,
-    OP_SWI,
-    OP_TAP,
-    OP_TAX,
-    OP_TPA,
-    OP_TST,
-    OP_TSTA,
-    OP_TSTX,
-    OP_TSX,
-    OP_TXA,
-    OP_TXS,
-    OP_WAIT,
+#define R_(Op) OP_##Op,
+    OPS_
+#undef R_
     OP_MAX
 };
 
