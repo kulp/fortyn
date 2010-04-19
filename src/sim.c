@@ -17,8 +17,23 @@ int loop_iterate(struct sim_state *state)
 {
     int rc = 0;
 
-    if (state->hc_state.state == RUNNING)
+    if (state->hc_state.state == RUNNING) {
+        // Save a copy of the current state before we modify it, so that we can
+        // compare it after an op and mark changed components of the state.
+        /// @todo use a different allocation strategy for this sort of coupled
+        /// malloc() / free() behavior that could use the same block
+        hc_state_t *prev = malloc(sizeof *prev);
+        memcpy(prev, &state->hc_state, sizeof *prev);
+        prev->next = &state->hc_state;
+        prev->prev = NULL;
+        free(state->hc_state.prev);
+        state->hc_state.prev = prev;
+
         hc_do_op(&state->hc_state);
+    }
+
+    free(state->hc_state.prev);
+    state->hc_state.prev = NULL;
 
     return rc;
 }
