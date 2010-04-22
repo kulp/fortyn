@@ -38,7 +38,7 @@ int loop_iterate(struct sim_state *state)
     return rc;
 }
 
-int load_binary_file(struct sim_state *state, const char *filename)
+int load_binary_file(hc_state_t *state, const char *filename)
 {
     int fd = open(filename, O_RDONLY);
     if (fd < 0)
@@ -49,16 +49,13 @@ int load_binary_file(struct sim_state *state, const char *filename)
     unsigned int pos = 0;
 
     while ((bytes = read(fd, buf, sizeof buf)) > 0) {
-        if (pos + bytes > (signed)sizeof state->hc_state.mem) {
+        if (pos + bytes > (signed)sizeof state->mem) {
             fprintf(stderr, "Input file size exceeds memory size\n");
             goto cleanup;
         }
-        memcpy(&state->hc_state.mem[pos], buf, bytes);
+        memcpy(&state->mem[pos], buf, bytes);
         pos += bytes;
     }
-
-    if (bytes >= 0)
-        state->loaded = true;
 
 cleanup:
     close(fd);

@@ -33,7 +33,9 @@ int main(int argc, char *argv[])
         if (!optarg) optarg = "0";
         switch (ch) {
             case 'i': 
-                rc = load_binary_file(&state, optarg);
+                if ((rc = load_binary_file(&state.hc_state, optarg)) > 0) {
+                    state.loaded = true;
+                }
                 break;
             default : rc = EXIT_FAILURE; /* FALLTHROUGH */
             case 'h': usage(argv[0]); exit(rc);

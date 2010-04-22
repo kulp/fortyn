@@ -154,6 +154,24 @@
     R_(TXS)    \
     R_(WAIT)
 
+#define MODES_ \
+    R_(DD)     \
+    R_(DIR)    \
+    R_(DIXP)   \
+    R_(EXT)    \
+    R_(IMD)    \
+    R_(IMM)    \
+    R_(INH)    \
+    R_(IX)     \
+    R_(IXP)    \
+    R_(IXPD)   \
+    R_(IX1)    \
+    R_(IX1P)   \
+    R_(IX2)    \
+    R_(REL)    \
+    R_(SP1)    \
+    R_(SP2)
+
 ////////////////////////////////////////////////////////////////////////////////
 // Type definitions
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,22 +187,9 @@ enum op {
 
 /// Addressing modes
 enum mode {
-    MODE_DD,
-    MODE_DIR,
-    MODE_DIXP,
-    MODE_EXT,
-    MODE_IMD,
-    MODE_IMM,
-    MODE_INH,
-    MODE_IX,
-    MODE_IXP,
-    MODE_IXPD,
-    MODE_IX1,
-    MODE_IX1P,
-    MODE_IX2,
-    MODE_REL,
-    MODE_SP1,
-    MODE_SP2,
+#define R_(Mode) MODE_##Mode,
+    MODES_
+#undef R_
     MODE_MAX
 };
 

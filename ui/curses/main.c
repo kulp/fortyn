@@ -28,7 +28,7 @@ int reload(struct sim_state *state)
 {
     int rc = 0;
 
-    rc = load_binary_file(state, state->memfile);
+    rc = load_binary_file(&state->hc_state, state->memfile);
 
     hc_state_init(&state->hc_state);
     hc_do_reset(&state->hc_state);

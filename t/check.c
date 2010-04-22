@@ -16,12 +16,20 @@ Suite* basic_suite(void)
 {
     Suite *s = suite_create("Basic");
 
-    TCase *tc = tcase_create("Core");
-    tcase_add_test(tc, test_null);
-    tcase_add_test(tc, test_init);
-    tcase_add_test(tc, test_reset);
-    tcase_add_test(tc, test_op_page_auto);
-    suite_add_tcase(s, tc);
+    {
+        TCase *tc = tcase_create("Core");
+        tcase_add_test(tc, test_null);
+        tcase_add_test(tc, test_init);
+        tcase_add_test(tc, test_reset);
+        tcase_add_test(tc, test_op_page_auto);
+        suite_add_tcase(s, tc);
+    }
+
+    {
+        TCase *tc = tcase_create("Run");
+        tcase_add_test(tc, test_add9);
+        suite_add_tcase(s, tc);
+    }
 
     return s;
 }

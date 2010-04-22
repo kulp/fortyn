@@ -376,8 +376,6 @@ const struct opinfo opinfos[2][256] = {
 
 int opinfos_size[] = { 253, 47 };
 
-#undef OPS_
-
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */
 

@@ -1,5 +1,5 @@
 LDLIBS += -lcheck
-CFLAGS += -std=c99 -I../src
+CFLAGS += -g -std=c99 -I../src
 
 CLEANFILES += *.[od] check
 

@@ -23,7 +23,7 @@ struct sim_state {
     char memfile[200];              ///< name of loaded memory-contents file
 };
 
-int load_binary_file(struct sim_state *state, const char *filename);
+int load_binary_file(hc_state_t *state, const char *filename);
 int loop_iterate(struct sim_state *state);
 int loop_continue(struct sim_state *state);
 
