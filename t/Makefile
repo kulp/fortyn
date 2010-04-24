@@ -7,10 +7,13 @@ HC08ASM = sdas6808
 HC08LNK = sdld6808
 
 CLEANFILES   += *.[od] check $(shell cat .gitignore)
-CLOBBERFILES += *.s19.genH
+CLOBBERFILES += *.s19.genH suites.h
 
-.PHONY: all run clean
+.PHONY: all regen run clean
 all: run
+
+# if suites.h is removed, "make regen" must be run before "make [all]"
+regen: suites.h ;
 
 clean:
 	-rm -rf $(CLEANFILES)
@@ -46,14 +49,21 @@ check: ops.o ops_impl.o sim.o hc08.o
 	mv $@.$$$$ $@
 
 ##############################################################################
+# Test generation
+
+suites.h: suites.xi
+	sed 's/SUITE_(\(.*\))/#include "\1.t"/' $^ > $@.$$$$ && \
+	mv $@.$$$$ $@
+
+##############################################################################
 # Dependency generation
 %.d: %.c
 	@set -e; rm -f $@; \
-	$(CC) -M -MG $(CPPFLAGS) $< > $@.$$$$; \
+	$(CC) -MMD -MG $(CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
-INHIBIT_DEPS = $(words $(filter %clean% clean% clean clobber,$(MAKECMDGOALS)))
+INHIBIT_DEPS = $(words $(filter regen %clean% clean% clean clobber,$(MAKECMDGOALS)))
 
 ifeq ($(INHIBIT_DEPS),0)
 -include $(notdir $(addsuffix .d,$(basename $(CFILES))))
