@@ -1,0 +1,1 @@
+TESTCASE_(Core)
