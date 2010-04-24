@@ -1,0 +1,7 @@
+*.s19
+*.lst
+*.sym
+*.rel
+*.mem
+*.map
+*.rst

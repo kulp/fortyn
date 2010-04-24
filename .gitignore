@@ -9,3 +9,4 @@ sim
 *.s19
 ui/*/main
 t/check
+*.vim

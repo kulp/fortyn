@@ -1,0 +1,4 @@
+NOP
+CLRA
+ADD #9
+WAIT
