@@ -1,9 +1,13 @@
 LDLIBS   += -lcheck
 CPPFLAGS += -I../src
-CFLAGS   += -g -std=c99
+CFLAGS   += -g -std=c99 -Wall -Wextra -Werror -pedantic-errors -Wno-unused-parameter
 CFILES   += $(wildcard *.c)
 
-CLEANFILES += *.[od] check $(shell cat .gitignore)
+HC08ASM = sdas6808
+HC08LNK = sdld6808
+
+CLEANFILES   += *.[od] check $(shell cat .gitignore)
+CLOBBERFILES += *.s19.genH
 
 .PHONY: all run clean
 all: run
@@ -20,27 +24,32 @@ run: check
 vpath %.c ../src
 check: ops.o ops_impl.o sim.o hc08.o
 
-%.rel: %.asm
-	sdas6808 -ols $@ $<
+##############################################################################
+# Create includable files from .s assembly sources
 
-%.lnk: %.rel
-	sed s/XXX/$*/g _tmpl.lnk > $@.$$$$ && \
+%.rel: %.asm
+	$(HC08ASM) -ols $@ $<
+
+%.lnk: _tmpl.tlnk %.rel
+	sed s/XXX/$*/g $< > $@.$$$$ && \
 	mv $@.$$$$ $@
 
 %.s19: %.lnk
-	sdld6808 -nf $<
+	$(HC08LNK) -nf $<
 
-%.asm: %.s
-	cat _tmpl.asm $< > $@.$$$$ && \
+%.asm: _tmpl.tasm %.s
+	cat $^ > $@.$$$$ && \
 	mv $@.$$$$ $@
 
 %.s19.genH: %.s19
 	../tools/s19_to_c.pl $^ > $@.$$$$ && \
 	mv $@.$$$$ $@
 
+##############################################################################
+# Dependency generation
 %.d: %.c
 	@set -e; rm -f $@; \
-	$(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
+	$(CC) -M -MG $(CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
