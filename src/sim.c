@@ -60,7 +60,7 @@ int load_binary_file(hc_state_t *state, const char *filename)
 cleanup:
     close(fd);
 
-    return bytes;
+    return pos;
 }
 
 /* vi:set ts=4 sw=4 et: */
