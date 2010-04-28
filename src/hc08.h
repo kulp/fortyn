@@ -6,6 +6,8 @@
 #ifndef HC08_H_
 #define HC08_H_
 
+#define _BSD_SOURCE
+
 #include <sys/types.h>
 #include <stdarg.h>
 #include <stdint.h>
