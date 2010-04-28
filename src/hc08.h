@@ -16,7 +16,7 @@
 #define MAX_INSN_LEN    4
 
 #if !(defined(BYTE_ORDER) && (BYTE_ORDER == LITTLE_ENDIAN || \
-                                BYTE_ORDER == BIG_ENDIAN))
+                              BYTE_ORDER == BIG_ENDIAN))
 #   error "Need BYTE_ORDER to be LITTLE_ENDIAN or BIG_ENDIAN to compile"
 #endif
 

@@ -852,11 +852,11 @@ int _handle_op_SBC_SUB_CMP_CPX(hc_state_t *state, const struct opinfo *info)
     bool compare_only = (op == OP_CMP || op == OP_CPX);
     uint8_t *r;
     switch (op) {
-        case OP_SBC:
-        case OP_SUB:
+        case OP_SBC: /* FALLTHROUGH */
+        case OP_SUB: /* FALLTHROUGH */
         case OP_CMP: r = &state->regs.A;          break;
         case OP_CPX: r = &state->regs.HX.bytes.X; break;
-        default: break;
+        default: hc_error("Invalid op"); break;
     }
 
     uint8_t o = *r;

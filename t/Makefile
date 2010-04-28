@@ -59,7 +59,7 @@ suites.h: suites.xi
 # Dependency generation
 %.d: %.c
 	@set -e; rm -f $@; \
-	$(CC) -MMD -MG $(CPPFLAGS) $< > $@.$$$$; \
+	$(CC) -MMD -MG $(CPPFLAGS) $< -MF $@.$$$$ -E -o /dev/null; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
