@@ -3,8 +3,7 @@ CPPFLAGS += -I../src
 CFLAGS   += -g -std=c99 -Wall -Wextra -Werror -pedantic-errors -Wno-unused-parameter
 CFILES   += $(wildcard *.c)
 
-DEFINES += _BSD_SOURCE
-LDLIBS += -lbsd-compat
+DEFINES += _GNU_SOURCE
 
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 override CFLAGS += $(patsubst %,-I%,$(INCLUDE))

@@ -8,8 +8,7 @@ CLEANFILES += $(UIS)
 vpath %.h src
 vpath %.c src
 
-DEFINES += _BSD_SOURCE
-LDLIBS += -lbsd-compat
+DEFINES += _GNU_SOURCE
 
 override CFLAGS += -g -std=c99 -W -Wall -Wextra -pedantic-errors -Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
