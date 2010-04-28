@@ -6,7 +6,7 @@
 #ifndef HC08_H_
 #define HC08_H_
 
-#include <endian.h>
+#include <sys/types.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -15,16 +15,16 @@
 #define MEMORY_SIZE     (1UL << 16)
 #define MAX_INSN_LEN    4
 
-#if !(defined(__BYTE_ORDER) && (__BYTE_ORDER == __LITTLE_ENDIAN || \
-                                __BYTE_ORDER == __BIG_ENDIAN))
-#   error "Need __BYTE_ORDER to be __LITTLE_ENDIAN or __BIG_ENDIAN to compile"
+#if !(defined(BYTE_ORDER) && (BYTE_ORDER == LITTLE_ENDIAN || \
+                                BYTE_ORDER == BIG_ENDIAN))
+#   error "Need BYTE_ORDER to be LITTLE_ENDIAN or BIG_ENDIAN to compile"
 #endif
 
 /// "as word pointer"
 #define _WP(X) ((uint16_t*)&(X))
 
 /// do byte swapping for 16-bit words
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
 #   define WORD(X) (*_WP(X))
 #else
 #   define WORD(X) (((*_WP(X) >> 8) & 0xFF) | (*_WP(X) << 8))
@@ -55,7 +55,7 @@ typedef struct hc_state_s {
         union {
             uint16_t word;
             struct {
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
                 uint8_t  H;     ///< index register (high)
                 uint8_t  X;     ///< index register (low)
 #else
@@ -67,7 +67,7 @@ typedef struct hc_state_s {
         union {
             addr_t word;       ///< stack pointer
             struct {
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
                 uint8_t SPH;    ///< high byte of SP
                 uint8_t SPL;    ///< low byte of SP
 #else
@@ -79,7 +79,7 @@ typedef struct hc_state_s {
         union {
             addr_t word;       ///< program counter
             struct {
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if BYTE_ORDER == BIG_ENDIAN
                 uint8_t PCH;    ///< high byte of PC
                 uint8_t PCL;    ///< low byte of PC
 #else

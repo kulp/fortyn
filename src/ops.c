@@ -51,6 +51,7 @@ static int handle_op_INVALID(__attribute__((unused)) hc_state_t *state,
 //------------------------------------------------------------------------------
 // Mapping opcode -> handler
 //------------------------------------------------------------------------------
+
 const actor_t actors[] = {
     [OP_INVALID] = handle_op_INVALID,
 #define R_(Op) [OP_##Op] = handle_op_##Op,

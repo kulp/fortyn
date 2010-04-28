@@ -2,6 +2,8 @@
 #define OPS_H_
 
 #include "hc08.h"
+#include "aliases.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
