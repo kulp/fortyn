@@ -3,6 +3,12 @@ CPPFLAGS += -I../src
 CFLAGS   += -g -std=c99 -Wall -Wextra -Werror -pedantic-errors -Wno-unused-parameter
 CFILES   += $(wildcard *.c)
 
+DEFINES += _BSD_SOURCE
+LDLIBS += -lbsd-compat
+
+override CFLAGS += $(patsubst %,-D%,$(DEFINES))
+override CFLAGS += $(patsubst %,-I%,$(INCLUDE))
+
 HC08ASM = sdas6808
 HC08LNK = sdld6808
 
