@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
         if (!optarg) optarg = "0";
         switch (ch) {
             case 'i': 
-                strncpy(state.memfile, optarg, sizeof state.memfile);
+                state.memfile = optarg;
                 break;
             default : rc = EXIT_FAILURE; /* FALLTHROUGH */
             case 'h': usage(argv[0]); exit(rc);
