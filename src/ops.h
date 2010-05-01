@@ -155,6 +155,13 @@
     R_(TXS)    \
     R_(WAIT)
 
+// equivalent instructions (alternate mnemonics, same opcode)
+#define OP_ASL  OP_LSL
+#define OP_ASLA OP_LSLA
+#define OP_ASLX OP_LSLX
+#define OP_BLO  OP_BCS
+#define OP_BHS  OP_BCC
+
 #define MODES_ \
     R_(DD)     \
     R_(DIR)    \
@@ -179,11 +186,28 @@
 
 /// Distinct operations (not literal values)
 enum op {
-    OP_INVALID,
+    OP_INVALID = 0,
 #define R_(Op) OP_##Op,
     OPS_
 #undef R_
     OP_MAX
+};
+
+#define OPCLASSES_ \
+    OPCLASS_(DATA_MOVEMENT) \
+    OPCLASS_(MATH) \
+    OPCLASS_(LOGICAL) \
+    OPCLASS_(SHIFT_ROTATE) \
+    OPCLASS_(JUMP_BRANCH_LOOP_CONTROL) \
+    OPCLASS_(STACK_RELATED) \
+    OPCLASS_(MISC)
+
+enum opclass {
+    OPCLASS_INVALID = 0,
+#define OPCLASS_(Opclass) OPCLASS_##Opclass,
+    OPCLASSES_
+#undef OPCLASS_
+    OPCLASS_MAX
 };
 
 /// Addressing modes
@@ -226,6 +250,14 @@ extern int pages_size;                      ///< how many elements in pages
 
 extern const struct opinfo opinfos[][256];  ///< detailed op descriptions
 extern int opinfos_size[];                  ///< how many elements in opinfos
+
+extern struct opclass_record {
+    enum opclass opclass;
+    size_t opcount;
+    enum op *ops;
+} opclass2op[];
+
+extern enum opclass op2opclass[];
 
 #endif
 

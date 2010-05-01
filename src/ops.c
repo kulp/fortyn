@@ -378,6 +378,177 @@ const struct opinfo opinfos[2][256] = {
 
 int opinfos_size[] = { 253, 47 };
 
+#define EIGHTOF_(Func,Pre) \
+    Func(Pre##0) \
+    Func(Pre##1) \
+    Func(Pre##2) \
+    Func(Pre##3) \
+    Func(Pre##4) \
+    Func(Pre##5) \
+    Func(Pre##6) \
+    Func(Pre##7)
+
+#define DATA_MOVEMENT_OPS \
+    OP_(LDA)           \
+    OP_(LDHX)          \
+    OP_(LDX)           \
+    OP_(STA)           \
+    OP_(STHX)          \
+    OP_(STX)           \
+    EIGHTOF_(OP_,BSET) \
+    EIGHTOF_(OP_,BCLR) \
+    OP_(MOV)           \
+    OP_(TAX)           \
+    OP_(TXA)           \
+    OP_(TAP)           \
+    OP_(TPA)           \
+    OP_(NSA)
+
+#define MATH_OPS \
+    OP_(ADC)  \
+    OP_(ADD)  \
+    OP_(AIS)  \
+    OP_(AIX)  \
+    OP_(SUB)  \
+    OP_(SBC)  \
+    OP_(MUL)  \
+    OP_(DIV)  \
+    OP_(INC)  \
+    OP_(INCA) \
+    OP_(INCX) \
+    OP_(DEC)  \
+    OP_(DECA) \
+    OP_(DECX) \
+    OP_(CLR)  \
+    OP_(CLRA) \
+    OP_(CLRX) \
+    OP_(NEG)  \
+    OP_(NEGA) \
+    OP_(NEGX) \
+    OP_(CMP)  \
+    OP_(CPHX) \
+    OP_(CPX)  \
+    OP_(TST)  \
+    OP_(TSTA) \
+    OP_(DAA)
+
+#define LOGICAL_OPS \
+    OP_(AND)  \
+    OP_(ORA)  \
+    OP_(EOR)  \
+    OP_(COM)  \
+    OP_(COMA) \
+    OP_(COMX) \
+    OP_(BIT)
+
+#define SHIFT_ROTATE_OPS \
+    OP_(LSL)  \
+    OP_(LSLA) \
+    OP_(LSLX) \
+    OP_(LSR)  \
+    OP_(LSRA) \
+    OP_(LSRX) \
+    OP_(ASL)  \
+    OP_(ASLA) \
+    OP_(ASLX) \
+    OP_(ASR)  \
+    OP_(ASRA) \
+    OP_(ASRX) \
+    OP_(ROL)  \
+    OP_(ROLA) \
+    OP_(ROLX) \
+    OP_(ROR)  \
+    OP_(RORA) \
+    OP_(RORX)
+
+#define JUMP_BRANCH_LOOP_CONTROL_OPS \
+    OP_(JMP)            \
+    OP_(BRA)            \
+    OP_(BRN)            \
+    OP_(BEQ)            \
+    OP_(BNE)            \
+    OP_(BCC)            \
+    OP_(BCS)            \
+    OP_(BPL)            \
+    OP_(BMI)            \
+    OP_(BIL)            \
+    OP_(BIH)            \
+    OP_(BMC)            \
+    OP_(BMS)            \
+    OP_(BHCC)           \
+    OP_(BHCS)           \
+    OP_(BLT)            \
+    OP_(BLE)            \
+    OP_(BGE)            \
+    OP_(BGT)            \
+    OP_(BLO)            \
+    OP_(BLS)            \
+    OP_(BHS)            \
+    OP_(BHI)            \
+    EIGHTOF_(OP_,BRCLR) \
+    EIGHTOF_(OP_,BRSET) \
+    OP_(CBEQ)           \
+    OP_(CBEQA)          \
+    OP_(CBEQX)          \
+    OP_(DBNZ)           \
+    OP_(DBNZA)          \
+    OP_(DBNZX)
+
+#define STACK_RELATED_OPS \
+    OP_(RSP)  \
+    OP_(TXS)  \
+    OP_(TSX)  \
+    OP_(JSR)  \
+    OP_(BSR)  \
+    OP_(RTS)  \
+    OP_(SWI)  \
+    OP_(RTI)  \
+    OP_(PSHA) \
+    OP_(PSHH) \
+    OP_(PSHX) \
+    OP_(PULA) \
+    OP_(PULH) \
+    OP_(PULX) \
+    OP_(AIS)
+
+#define MISC_OPS \
+    OP_(NOP)  \
+    OP_(SEC)  \
+    OP_(CLC)  \
+    OP_(SEI)  \
+    OP_(CLI)  \
+    OP_(BGND) \
+    OP_(WAIT) \
+    OP_(STOP)
+
+struct opclass_record opclass2op[] = {
+#define ARRAY_(Ops) (enum op[]){ Ops }
+#define OP_(Op)     OP_##Op,
+#define OPCLASS_(Class) \
+    [OPCLASS_##Class] = { OPCLASS_##Class, countof(ARRAY_(Class##_OPS)), ARRAY_(Class##_OPS) },
+
+    OPCLASSES_
+
+#undef OPCLASS_
+#undef OP_
+#undef ARRAY_
+};
+
+#if 0
+enum opclass op2opclass[] = {
+#define ARRAY_(Ops) (enum op[]){ Ops }
+#define OP_(Op)     [OP_##Op] =
+#define OPCLASS_(Class) \
+    [OPCLASS_##Class] = OPCLASS_##Class, countof(ARRAY_(Class##_OPS)), ARRAY_(Class##_OPS) },
+
+    OPCLASSES_
+
+#undef OPCLASS_
+#undef OP_
+#undef ARRAY_
+};
+#endif
+ 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */
 
