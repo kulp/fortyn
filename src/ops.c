@@ -378,152 +378,152 @@ const struct opinfo opinfos[2][256] = {
 
 int opinfos_size[] = { 253, 47 };
 
-#define EIGHTOF_(Func,Pre) \
-    Func(Pre##0) \
-    Func(Pre##1) \
-    Func(Pre##2) \
-    Func(Pre##3) \
-    Func(Pre##4) \
-    Func(Pre##5) \
-    Func(Pre##6) \
-    Func(Pre##7)
+#define EIGHTOF_(Func,Pre,...) \
+    Func(Pre##0, __VA_ARGS__) \
+    Func(Pre##1, __VA_ARGS__) \
+    Func(Pre##2, __VA_ARGS__) \
+    Func(Pre##3, __VA_ARGS__) \
+    Func(Pre##4, __VA_ARGS__) \
+    Func(Pre##5, __VA_ARGS__) \
+    Func(Pre##6, __VA_ARGS__) \
+    Func(Pre##7, __VA_ARGS__)
 
 #define DATA_MOVEMENT_OPS \
-    OP_(LDA)           \
-    OP_(LDHX)          \
-    OP_(LDX)           \
-    OP_(STA)           \
-    OP_(STHX)          \
-    OP_(STX)           \
-    EIGHTOF_(OP_,BSET) \
-    EIGHTOF_(OP_,BCLR) \
-    OP_(MOV)           \
-    OP_(TAX)           \
-    OP_(TXA)           \
-    OP_(TAP)           \
-    OP_(TPA)           \
-    OP_(NSA)
+    OP_(LDA     , DATA_MOVEMENT) \
+    OP_(LDHX    , DATA_MOVEMENT) \
+    OP_(LDX     , DATA_MOVEMENT) \
+    OP_(STA     , DATA_MOVEMENT) \
+    OP_(STHX    , DATA_MOVEMENT) \
+    OP_(STX     , DATA_MOVEMENT) \
+    EIGHTOF_(OP_, BSET, DATA_MOVEMENT) \
+    EIGHTOF_(OP_, BCLR, DATA_MOVEMENT) \
+    OP_(MOV     , DATA_MOVEMENT) \
+    OP_(TAX     , DATA_MOVEMENT) \
+    OP_(TXA     , DATA_MOVEMENT) \
+    OP_(TAP     , DATA_MOVEMENT) \
+    OP_(TPA     , DATA_MOVEMENT) \
+    OP_(NSA     , DATA_MOVEMENT)
 
 #define MATH_OPS \
-    OP_(ADC)  \
-    OP_(ADD)  \
-    OP_(AIS)  \
-    OP_(AIX)  \
-    OP_(SUB)  \
-    OP_(SBC)  \
-    OP_(MUL)  \
-    OP_(DIV)  \
-    OP_(INC)  \
-    OP_(INCA) \
-    OP_(INCX) \
-    OP_(DEC)  \
-    OP_(DECA) \
-    OP_(DECX) \
-    OP_(CLR)  \
-    OP_(CLRA) \
-    OP_(CLRX) \
-    OP_(NEG)  \
-    OP_(NEGA) \
-    OP_(NEGX) \
-    OP_(CMP)  \
-    OP_(CPHX) \
-    OP_(CPX)  \
-    OP_(TST)  \
-    OP_(TSTA) \
-    OP_(DAA)
+    OP_(ADC , MATH) \
+    OP_(ADD , MATH) \
+    OP_(AIS , MATH) \
+    OP_(AIX , MATH) \
+    OP_(SUB , MATH) \
+    OP_(SBC , MATH) \
+    OP_(MUL , MATH) \
+    OP_(DIV , MATH) \
+    OP_(INC , MATH) \
+    OP_(INCA, MATH) \
+    OP_(INCX, MATH) \
+    OP_(DEC , MATH) \
+    OP_(DECA, MATH) \
+    OP_(DECX, MATH) \
+    OP_(CLR , MATH) \
+    OP_(CLRA, MATH) \
+    OP_(CLRX, MATH) \
+    OP_(NEG , MATH) \
+    OP_(NEGA, MATH) \
+    OP_(NEGX, MATH) \
+    OP_(CMP , MATH) \
+    OP_(CPHX, MATH) \
+    OP_(CPX , MATH) \
+    OP_(TST , MATH) \
+    OP_(TSTA, MATH) \
+    OP_(DAA , MATH)
 
 #define LOGICAL_OPS \
-    OP_(AND)  \
-    OP_(ORA)  \
-    OP_(EOR)  \
-    OP_(COM)  \
-    OP_(COMA) \
-    OP_(COMX) \
-    OP_(BIT)
+    OP_(AND , LOGICAL) \
+    OP_(ORA , LOGICAL) \
+    OP_(EOR , LOGICAL) \
+    OP_(COM , LOGICAL) \
+    OP_(COMA, LOGICAL) \
+    OP_(COMX, LOGICAL) \
+    OP_(BIT , LOGICAL)
 
 #define SHIFT_ROTATE_OPS \
-    OP_(LSL)  \
-    OP_(LSLA) \
-    OP_(LSLX) \
-    OP_(LSR)  \
-    OP_(LSRA) \
-    OP_(LSRX) \
-    OP_(ASL)  \
-    OP_(ASLA) \
-    OP_(ASLX) \
-    OP_(ASR)  \
-    OP_(ASRA) \
-    OP_(ASRX) \
-    OP_(ROL)  \
-    OP_(ROLA) \
-    OP_(ROLX) \
-    OP_(ROR)  \
-    OP_(RORA) \
-    OP_(RORX)
+    OP_(LSL , SHIFT_ROTATE) \
+    OP_(LSLA, SHIFT_ROTATE) \
+    OP_(LSLX, SHIFT_ROTATE) \
+    OP_(LSR , SHIFT_ROTATE) \
+    OP_(LSRA, SHIFT_ROTATE) \
+    OP_(LSRX, SHIFT_ROTATE) \
+    OP_(ASL , SHIFT_ROTATE) \
+    OP_(ASLA, SHIFT_ROTATE) \
+    OP_(ASLX, SHIFT_ROTATE) \
+    OP_(ASR , SHIFT_ROTATE) \
+    OP_(ASRA, SHIFT_ROTATE) \
+    OP_(ASRX, SHIFT_ROTATE) \
+    OP_(ROL , SHIFT_ROTATE) \
+    OP_(ROLA, SHIFT_ROTATE) \
+    OP_(ROLX, SHIFT_ROTATE) \
+    OP_(ROR , SHIFT_ROTATE) \
+    OP_(RORA, SHIFT_ROTATE) \
+    OP_(RORX, SHIFT_ROTATE)
 
 #define JUMP_BRANCH_LOOP_CONTROL_OPS \
-    OP_(JMP)            \
-    OP_(BRA)            \
-    OP_(BRN)            \
-    OP_(BEQ)            \
-    OP_(BNE)            \
-    OP_(BCC)            \
-    OP_(BCS)            \
-    OP_(BPL)            \
-    OP_(BMI)            \
-    OP_(BIL)            \
-    OP_(BIH)            \
-    OP_(BMC)            \
-    OP_(BMS)            \
-    OP_(BHCC)           \
-    OP_(BHCS)           \
-    OP_(BLT)            \
-    OP_(BLE)            \
-    OP_(BGE)            \
-    OP_(BGT)            \
-    OP_(BLO)            \
-    OP_(BLS)            \
-    OP_(BHS)            \
-    OP_(BHI)            \
-    EIGHTOF_(OP_,BRCLR) \
-    EIGHTOF_(OP_,BRSET) \
-    OP_(CBEQ)           \
-    OP_(CBEQA)          \
-    OP_(CBEQX)          \
-    OP_(DBNZ)           \
-    OP_(DBNZA)          \
-    OP_(DBNZX)
+    OP_(JMP     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BRA     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BRN     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BEQ     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BNE     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BCC     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BCS     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BPL     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BMI     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BIL     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BIH     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BMC     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BMS     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BHCC    , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BHCS    , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BLT     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BLE     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BGE     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BGT     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BLO     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BLS     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BHS     , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(BHI     , JUMP_BRANCH_LOOP_CONTROL) \
+    EIGHTOF_(OP_, BRCLR, JUMP_BRANCH_LOOP_CONTROL) \
+    EIGHTOF_(OP_, BRSET, JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(CBEQ    , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(CBEQA   , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(CBEQX   , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(DBNZ    , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(DBNZA   , JUMP_BRANCH_LOOP_CONTROL) \
+    OP_(DBNZX   , JUMP_BRANCH_LOOP_CONTROL)
 
 #define STACK_RELATED_OPS \
-    OP_(RSP)  \
-    OP_(TXS)  \
-    OP_(TSX)  \
-    OP_(JSR)  \
-    OP_(BSR)  \
-    OP_(RTS)  \
-    OP_(SWI)  \
-    OP_(RTI)  \
-    OP_(PSHA) \
-    OP_(PSHH) \
-    OP_(PSHX) \
-    OP_(PULA) \
-    OP_(PULH) \
-    OP_(PULX) \
-    OP_(AIS)
+    OP_(RSP , STACK_RELATED) \
+    OP_(TXS , STACK_RELATED) \
+    OP_(TSX , STACK_RELATED) \
+    OP_(JSR , STACK_RELATED) \
+    OP_(BSR , STACK_RELATED) \
+    OP_(RTS , STACK_RELATED) \
+    OP_(SWI , STACK_RELATED) \
+    OP_(RTI , STACK_RELATED) \
+    OP_(PSHA, STACK_RELATED) \
+    OP_(PSHH, STACK_RELATED) \
+    OP_(PSHX, STACK_RELATED) \
+    OP_(PULA, STACK_RELATED) \
+    OP_(PULH, STACK_RELATED) \
+    OP_(PULX, STACK_RELATED) \
+    OP_(AIS , STACK_RELATED)
 
 #define MISC_OPS \
-    OP_(NOP)  \
-    OP_(SEC)  \
-    OP_(CLC)  \
-    OP_(SEI)  \
-    OP_(CLI)  \
-    OP_(BGND) \
-    OP_(WAIT) \
-    OP_(STOP)
+    OP_(NOP , MISC) \
+    OP_(SEC , MISC) \
+    OP_(CLC , MISC) \
+    OP_(SEI , MISC) \
+    OP_(CLI , MISC) \
+    OP_(BGND, MISC) \
+    OP_(WAIT, MISC) \
+    OP_(STOP, MISC)
 
 struct opclass_record opclass2op[] = {
 #define ARRAY_(Ops) (enum op[]){ Ops }
-#define OP_(Op)     OP_##Op,
+#define OP_(Op,X)   OP_##Op,
 #define OPCLASS_(Class) \
     [OPCLASS_##Class] = { OPCLASS_##Class, countof(ARRAY_(Class##_OPS)), ARRAY_(Class##_OPS) },
 
@@ -534,20 +534,15 @@ struct opclass_record opclass2op[] = {
 #undef ARRAY_
 };
 
-#if 0
 enum opclass op2opclass[] = {
-#define ARRAY_(Ops) (enum op[]){ Ops }
-#define OP_(Op)     [OP_##Op] =
-#define OPCLASS_(Class) \
-    [OPCLASS_##Class] = OPCLASS_##Class, countof(ARRAY_(Class##_OPS)), ARRAY_(Class##_OPS) },
+#define OP_(Op,Class)   [OP_##Op] = OPCLASS_##Class,
+#define OPCLASS_(Class) Class##_OPS
 
     OPCLASSES_
 
 #undef OPCLASS_
 #undef OP_
-#undef ARRAY_
 };
-#endif
  
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */
