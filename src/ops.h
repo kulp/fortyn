@@ -234,7 +234,7 @@ struct page {
 };
 
 /// @todo define what the return value of an actor_t means
-typedef int (*actor_t)(hc_state_t *state, const struct opinfo *info);
+typedef int (*actor_t)(struct hc_state *state, const struct opinfo *info);
 
 extern const char *opnames[];               ///< string names for each op
 extern int opnames_size;                    ///< how many elements in opnames

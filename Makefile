@@ -8,7 +8,7 @@ CLEANFILES += $(UIS)
 vpath %.h src
 vpath %.c src
 
-override CFLAGS += -g -std=c99 -W -Wall -Wextra -pedantic-errors -Werror
+override CFLAGS += -g -std=c99 -W -Wall -Wextra -pedantic-errors #-Werror -Wno-unused-parameter
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 override CFLAGS += $(patsubst %,-I%,$(INCLUDE))
 
@@ -28,7 +28,7 @@ ui/curses/main: LDLIBS += -lncurses
 # Ordering is important here: there may be multiple weak definitions of any
 # particular op handler, and in such a case the first definition is taken (which
 # should not be the default handler from ops.o).
-$(UIS): sim.o hc08.o ops_impl.o ops.o 
+$(UIS): sim.o hc08.o ops_impl.o ops.o hooks.o
 
 ops_impl.o: CFLAGS += -Wno-unused-parameter
 

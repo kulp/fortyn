@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <string.h>
 
-int hc_state_init(hc_state_t *st)
+int hc_state_init(struct hc_state *st)
 {
     int rc = 0;
 
@@ -17,7 +17,7 @@ int hc_state_init(hc_state_t *st)
     return rc;
 }
 
-int hc_do_reset(hc_state_t *st)
+int hc_do_reset(struct hc_state *st)
 {
     int rc = 0;
 
@@ -39,7 +39,7 @@ int hc_do_reset(hc_state_t *st)
     return rc;
 }
 
-int hc_op_page(hc_state_t *st)
+int hc_op_page(struct hc_state *st)
 {
     int rc = 0; // default page is zero, the no-prefix page
 
@@ -62,7 +62,7 @@ int hc_op_page(hc_state_t *st)
     return rc;
 }
 
-int hc_do_op(hc_state_t *st)
+int hc_do_op(struct hc_state *st)
 {
     int rc = 0;
 

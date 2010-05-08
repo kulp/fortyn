@@ -46,7 +46,7 @@
 
 typedef uint16_t addr_t;
 
-typedef struct hc_state_s {
+struct hc_state {
     enum {
         POWER_OFF, STOP1, STOP2, STOP3, WAITING, RUNNING
     } state;                    ///< the run-state of the state machine
@@ -108,13 +108,13 @@ typedef struct hc_state_s {
     } regs;
     uint8_t mem[MEMORY_SIZE];
 
-    struct hc_state_s *prev;    ///< pointer to previous state
-    struct hc_state_s *next;    ///< pointer to next state
-} hc_state_t;
+    struct hc_state *prev;      ///< pointer to previous state
+    struct hc_state *next;      ///< pointer to next state
+};
 
-int hc_state_init(hc_state_t *st);
-int hc_do_reset(hc_state_t *st);
-int hc_do_op(hc_state_t *st);
+int hc_state_init(struct hc_state *st);
+int hc_do_reset(struct hc_state *st);
+int hc_do_op(struct hc_state *st);
 
 static inline void hc_error(const char *fmt, ...)
 {
@@ -133,7 +133,7 @@ static inline void hc_error(const char *fmt, ...)
  *
  * @return the page number. No error conditions can be reported.
  */
-int hc_op_page(hc_state_t *st);
+int hc_op_page(struct hc_state *st);
 
 #endif
 

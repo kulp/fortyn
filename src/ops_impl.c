@@ -12,7 +12,7 @@
  *
  * @return an error code, or zero on success
  */
-static int _decode_addrs(hc_state_t *state, const struct opinfo *info,
+static int _decode_addrs(struct hc_state *state, const struct opinfo *info,
                          addr_t *from, addr_t *to)
 {
     int rc = 0;
@@ -61,19 +61,19 @@ static int _decode_addrs(hc_state_t *state, const struct opinfo *info,
     return rc;
 }
 
-static inline int _push(hc_state_t *state, uint8_t value)
+static inline int _push(struct hc_state *state, uint8_t value)
 {
     state->mem[state->regs.SP.word--] = value;
     return 0;
 }
 
-static inline int _pull(hc_state_t *state, uint8_t *value)
+static inline int _pull(struct hc_state *state, uint8_t *value)
 {
     *value = state->mem[++state->regs.SP.word];
     return 0;
 }
 
-int _handle_op_ADC_ADD(hc_state_t *state, const struct opinfo *info)
+int _handle_op_ADC_ADD(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -99,7 +99,7 @@ int _handle_op_ADC_ADD(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_AIS(hc_state_t *state, const struct opinfo *info)
+int handle_op_AIS(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -111,7 +111,7 @@ int handle_op_AIS(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_AIX(hc_state_t *state, const struct opinfo *info)
+int handle_op_AIX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -123,7 +123,7 @@ int handle_op_AIX(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_AND_BIT(hc_state_t *state, const struct opinfo *info)
+int _handle_op_AND_BIT(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -142,7 +142,7 @@ int _handle_op_AND_BIT(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_ASR_LSR_ROR(hc_state_t *state, const struct opinfo *info)
+int _handle_op_ASR_LSR_ROR(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -183,7 +183,7 @@ int _handle_op_ASR_LSR_ROR(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_BGND(hc_state_t *state, const struct opinfo *info)
+int handle_op_BGND(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -194,7 +194,7 @@ int handle_op_BGND(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
+int _handle_op_BRANCHES(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -263,7 +263,7 @@ int _handle_op_BRANCHES(hc_state_t *state, const struct opinfo *info)
 
 
 
-int _handle_op_BSET_BCLR(hc_state_t *state, const struct opinfo *info)
+int _handle_op_BSET_BCLR(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -281,7 +281,7 @@ int _handle_op_BSET_BCLR(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_CBEQ_CBEQA_CBEQX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_CBEQ_CBEQA_CBEQX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -309,7 +309,7 @@ int _handle_op_CBEQ_CBEQA_CBEQX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_CLC(hc_state_t *state, const struct opinfo *info)
+int handle_op_CLC(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -318,7 +318,7 @@ int handle_op_CLC(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_CLI(hc_state_t *state, const struct opinfo *info)
+int handle_op_CLI(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -327,7 +327,7 @@ int handle_op_CLI(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_CLR(hc_state_t *state, const struct opinfo *info)
+int _handle_op_CLR(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -354,7 +354,7 @@ int _handle_op_CLR(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_COM_COMA_COMX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_COM_COMA_COMX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -380,7 +380,7 @@ int _handle_op_COM_COMA_COMX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_CPHX(hc_state_t *state, const struct opinfo *info)
+int handle_op_CPHX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -402,7 +402,7 @@ int handle_op_CPHX(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_DAA(hc_state_t *state, const struct opinfo *info)
+int handle_op_DAA(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -447,7 +447,7 @@ int handle_op_DAA(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_DBNZ_DBNZA_DBNZX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_DBNZ_DBNZA_DBNZX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -476,7 +476,7 @@ int _handle_op_DBNZ_DBNZA_DBNZX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_DEC(hc_state_t *state, const struct opinfo *info)
+int _handle_op_DEC(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -503,7 +503,7 @@ int _handle_op_DEC(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_DIV(hc_state_t *state, const struct opinfo *info)
+int handle_op_DIV(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -526,7 +526,7 @@ int handle_op_DIV(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_EOR_ORA(hc_state_t *state, const struct opinfo *info)
+int _handle_op_EOR_ORA(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -548,7 +548,7 @@ int _handle_op_EOR_ORA(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_INC_INCA_INCX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_INC_INCA_INCX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -575,7 +575,7 @@ int _handle_op_INC_INCA_INCX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_JMP(hc_state_t *state, const struct opinfo *info)
+int handle_op_JMP(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -587,7 +587,7 @@ int handle_op_JMP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_JSR_BSR(hc_state_t *state, const struct opinfo *info)
+int _handle_op_JSR_BSR(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -602,7 +602,7 @@ int _handle_op_JSR_BSR(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_LDA_LDX_STA_STX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_LDA_LDX_STA_STX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -633,7 +633,7 @@ int _handle_op_LDA_LDX_STA_STX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_LDHX_STHX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_LDHX_STHX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -656,7 +656,7 @@ int _handle_op_LDHX_STHX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_LSL_ROL(hc_state_t *state, const struct opinfo *info)
+int _handle_op_LSL_ROL(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -690,7 +690,7 @@ int _handle_op_LSL_ROL(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_MOV(hc_state_t *state, const struct opinfo *info)
+int handle_op_MOV(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -710,7 +710,7 @@ int handle_op_MOV(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_MUL(hc_state_t *state, const struct opinfo *info)
+int handle_op_MUL(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -724,7 +724,7 @@ int handle_op_MUL(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_NEG(hc_state_t *state, const struct opinfo *info)
+int _handle_op_NEG(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -753,7 +753,7 @@ int _handle_op_NEG(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_NOP(hc_state_t *state, const struct opinfo *info)
+int handle_op_NOP(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -762,7 +762,7 @@ int handle_op_NOP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_NSA(hc_state_t *state, const struct opinfo *info)
+int handle_op_NSA(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -772,7 +772,7 @@ int handle_op_NSA(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_PSH(hc_state_t *state, const struct opinfo *info)
+int _handle_op_PSH(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -790,7 +790,7 @@ int _handle_op_PSH(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int _handle_op_PUL(hc_state_t *state, const struct opinfo *info)
+int _handle_op_PUL(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -808,7 +808,7 @@ int _handle_op_PUL(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_RSP(hc_state_t *state, const struct opinfo *info)
+int handle_op_RSP(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -817,7 +817,7 @@ int handle_op_RSP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_RTI(hc_state_t *state, const struct opinfo *info)
+int handle_op_RTI(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -830,7 +830,7 @@ int handle_op_RTI(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_RTS(hc_state_t *state, const struct opinfo *info)
+int handle_op_RTS(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -840,7 +840,7 @@ int handle_op_RTS(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_SBC_SUB_CMP_CPX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_SBC_SUB_CMP_CPX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -876,7 +876,7 @@ int _handle_op_SBC_SUB_CMP_CPX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_SEC(hc_state_t *state, const struct opinfo *info)
+int handle_op_SEC(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -885,7 +885,7 @@ int handle_op_SEC(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_SEI(hc_state_t *state, const struct opinfo *info)
+int handle_op_SEI(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -894,7 +894,7 @@ int handle_op_SEI(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_STOP(hc_state_t *state, const struct opinfo *info)
+int handle_op_STOP(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -904,7 +904,7 @@ int handle_op_STOP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_SWI(hc_state_t *state, const struct opinfo *info)
+int handle_op_SWI(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -920,7 +920,7 @@ int handle_op_SWI(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_TAP(hc_state_t *state, const struct opinfo *info)
+int handle_op_TAP(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -929,7 +929,7 @@ int handle_op_TAP(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_TAX(hc_state_t *state, const struct opinfo *info)
+int handle_op_TAX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -938,7 +938,7 @@ int handle_op_TAX(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_TPA(hc_state_t *state, const struct opinfo *info)
+int handle_op_TPA(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -947,7 +947,7 @@ int handle_op_TPA(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int _handle_op_TST_TSTA_TSTX(hc_state_t *state, const struct opinfo *info)
+int _handle_op_TST_TSTA_TSTX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -971,7 +971,7 @@ int _handle_op_TST_TSTA_TSTX(hc_state_t *state, const struct opinfo *info)
 }
 
 
-int handle_op_TSX(hc_state_t *state, const struct opinfo *info)
+int handle_op_TSX(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -980,7 +980,7 @@ int handle_op_TSX(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_TXA(hc_state_t *state, const struct opinfo *info)
+int handle_op_TXA(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -989,7 +989,7 @@ int handle_op_TXA(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_TXS(hc_state_t *state, const struct opinfo *info)
+int handle_op_TXS(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 
@@ -998,7 +998,7 @@ int handle_op_TXS(hc_state_t *state, const struct opinfo *info)
     return rc;
 }
 
-int handle_op_WAIT(hc_state_t *state, const struct opinfo *info)
+int handle_op_WAIT(struct hc_state *state, const struct opinfo *info)
 {
     int rc = 0;
 

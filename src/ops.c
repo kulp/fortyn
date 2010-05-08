@@ -34,7 +34,7 @@ const char *modenames[] = {
 
 int modenames_size = countof(modenames);
 
-static int handle_op_INVALID(__attribute__((unused)) hc_state_t *state,
+static int handle_op_INVALID(__attribute__((unused)) struct hc_state *state,
                              __attribute__((unused)) const struct opinfo *info)
 {
     extern void abort(void);
@@ -45,7 +45,7 @@ static int handle_op_INVALID(__attribute__((unused)) hc_state_t *state,
 //------------------------------------------------------------------------------
 // Function declarations
 //------------------------------------------------------------------------------
-#define R_(Op) int handle_op_##Op(hc_state_t *state, const struct opinfo *info);
+#define R_(Op) int handle_op_##Op(struct hc_state *state, const struct opinfo *info);
     OPS_
 #undef R_
 
@@ -407,7 +407,10 @@ int opinfos_size[] = { 253, 47 };
 #define MATH_OPS \
     OP_(ADC , MATH) \
     OP_(ADD , MATH) \
-    OP_(AIS , MATH) \
+    /* XXX hack */ \
+    /* AIS is both MATH and STACK_RELATED, but our macros don't let us specify \
+     * both yet. For now, consider AIS just STACK_RELATED. */ \
+    /* OP_(AIS , MATH) */ \
     OP_(AIX , MATH) \
     OP_(SUB , MATH) \
     OP_(SBC , MATH) \
@@ -448,9 +451,10 @@ int opinfos_size[] = { 253, 47 };
     OP_(LSR , SHIFT_ROTATE) \
     OP_(LSRA, SHIFT_ROTATE) \
     OP_(LSRX, SHIFT_ROTATE) \
-    OP_(ASL , SHIFT_ROTATE) \
-    OP_(ASLA, SHIFT_ROTATE) \
-    OP_(ASLX, SHIFT_ROTATE) \
+    /* aliases */ \
+    /* OP_(ASL , SHIFT_ROTATE) */ \
+    /* OP_(ASLA, SHIFT_ROTATE) */ \
+    /* OP_(ASLX, SHIFT_ROTATE) */ \
     OP_(ASR , SHIFT_ROTATE) \
     OP_(ASRA, SHIFT_ROTATE) \
     OP_(ASRX, SHIFT_ROTATE) \
@@ -481,9 +485,11 @@ int opinfos_size[] = { 253, 47 };
     OP_(BLE     , JUMP_BRANCH_LOOP_CONTROL) \
     OP_(BGE     , JUMP_BRANCH_LOOP_CONTROL) \
     OP_(BGT     , JUMP_BRANCH_LOOP_CONTROL) \
-    OP_(BLO     , JUMP_BRANCH_LOOP_CONTROL) \
+    /* alias */ \
+    /* OP_(BLO     , JUMP_BRANCH_LOOP_CONTROL) */ \
     OP_(BLS     , JUMP_BRANCH_LOOP_CONTROL) \
-    OP_(BHS     , JUMP_BRANCH_LOOP_CONTROL) \
+    /* alias */ \
+    /* OP_(BHS     , JUMP_BRANCH_LOOP_CONTROL) */ \
     OP_(BHI     , JUMP_BRANCH_LOOP_CONTROL) \
     EIGHTOF_(OP_, BRCLR, JUMP_BRANCH_LOOP_CONTROL) \
     EIGHTOF_(OP_, BRSET, JUMP_BRANCH_LOOP_CONTROL) \

@@ -22,7 +22,7 @@ int loop_iterate(struct sim_state *state)
         // compare it after an op and mark changed components of the state.
         /// @todo use a different allocation strategy for this sort of coupled
         /// malloc() / free() behavior that could use the same block
-        hc_state_t *prev = malloc(sizeof *prev);
+        struct hc_state *prev = malloc(sizeof *prev);
         memcpy(prev, &state->hc_state, sizeof *prev);
         prev->next = &state->hc_state;
         prev->prev = NULL;
@@ -38,7 +38,7 @@ int loop_iterate(struct sim_state *state)
     return rc;
 }
 
-int load_binary_file(hc_state_t *state, const char *filename)
+int load_binary_file(struct hc_state *state, const char *filename)
 {
     int fd = open(filename, O_RDONLY);
     if (fd < 0)

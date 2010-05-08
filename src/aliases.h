@@ -142,7 +142,7 @@
 	R_(_handle_op_SBC_SUB_CMP_CPX) \
 	R_(_handle_op_TST_TSTA_TSTX)
 
-#define R_(Op) int handle_op_##Op(hc_state_t *state, const struct opinfo *info);
+#define R_(Op) int handle_op_##Op(struct hc_state *state, const struct opinfo *info);
 	ALIAS_DECLS
 #undef R_
 

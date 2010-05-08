@@ -94,7 +94,7 @@ int screen_update(struct sim_state *state)
 {
     int rc = 0;
 
-    hc_state_t *hc = &state->hc_state;
+    struct hc_state *hc = &state->hc_state;
     //struct curses_data *uidata = state->ui.data;
 
     int row = 0;
