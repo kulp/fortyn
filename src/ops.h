@@ -259,6 +259,9 @@ extern struct opclass_record {
 
 extern enum opclass op2opclass[];
 
+const struct opinfo* hc_curr_opinfo(struct hc_state *st);
+enum op hc_curr_op(struct hc_state *st);
+
 #endif
 
 /* vi:set ts=4 sw=4 et: */

@@ -5,6 +5,7 @@
 
 #include "ops.h"
 #include "sim.h"
+#include "hooks_internal.h"
 
 #include <fcntl.h>
 #include <getopt.h>
@@ -29,7 +30,9 @@ int loop_iterate(struct sim_state *state)
         free(state->hc_state.prev);
         state->hc_state.prev = prev;
 
+        hc_hook_pre_op(state);
         hc_do_op(&state->hc_state);
+        hc_hook_post_op(state);
     }
 
     free(state->hc_state.prev);

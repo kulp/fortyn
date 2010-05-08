@@ -7,7 +7,7 @@ END_TEST
 /// Test hc_state_init()
 START_TEST(test_init)
 {
-    hc_state_t hc;
+    struct hc_state hc;
     uint8_t zeroes[sizeof hc.mem] = { 0 };
     hc_state_init(&hc);
 
@@ -27,7 +27,7 @@ END_TEST
 /// Test hc_do_reset
 START_TEST(test_reset)
 {
-    hc_state_t hc;
+    struct hc_state hc;
     hc_state_init(&hc);
     hc_do_reset(&hc);
 
@@ -42,7 +42,7 @@ END_TEST
 /// Test hc_op_page function (rather pointless check)
 START_TEST(test_op_page_auto)
 {
-    hc_state_t hc = { .regs.PC.word = 0 };
+    struct hc_state hc = { .regs.PC.word = 0 };
 
     for (int page = 0; page < pages_size; page++)
         for (enum op op = 0; op < OP_MAX; op++)

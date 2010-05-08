@@ -16,12 +16,12 @@ enum hook_type {
     HOOK_TYPE_MAX
 };
 
+/// these are actually OR-able flags
 enum hook_when {
     HOOK_WHEN_INVALID = 0,
-    HOOK_WHEN_BEFORE,
-    HOOK_WHEN_AFTER,
-    HOOK_WHEN_INSTEAD,
-    HOOK_WHEN_MAX
+    HOOK_WHEN_BEFORE  = 1,
+    //HOOK_WHEN_INSTEAD = 2, /// @todo support this
+    HOOK_WHEN_AFTER   = 4,
 };
 
 struct sim_state;
@@ -29,17 +29,17 @@ struct hc_state;
 
 typedef int (*hc_op_hook)(
     struct sim_state *state,
-    unsigned flags,
-    enum op op
+    enum op op,
     /// @todo
+    void *userdata
     );
 
 typedef int (*hc_opclass_hook)(
     struct sim_state *state,
-    unsigned flags,
     enum opclass opclass,
-    enum op op
+    enum op op,
     /// @todo
+    void *userdata
     );
 
 /**
@@ -47,7 +47,7 @@ typedef int (*hc_opclass_hook)(
  * passed in generically to be compared by address if needed, not to be called.
  */
 /// @todo provide sim_state instead of hc_state ?
-typedef bool (*hc_pred)(struct hc_state*, enum op, void (* const hook)());
+typedef bool (*hc_pred)(const struct hc_state*, const void *userdata, enum op, void (* const hook)());
 
 /*
  * Calling convention:
@@ -55,7 +55,7 @@ typedef bool (*hc_pred)(struct hc_state*, enum op, void (* const hook)());
  *  OPCLASS: opclass, hook
  *  PRED:    pred, hook
  */
-int hc_hook_install(struct sim_state*, enum hook_when, enum hook_type, ...);
+int hc_hook_install(struct sim_state*, void *userdata, enum hook_when, enum hook_type, ...);
 
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */

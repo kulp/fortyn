@@ -9,6 +9,7 @@ struct hook_entry {
     enum hook_when when;
     union {
         hc_op_hook op;
+        hc_op_hook pred;
         hc_opclass_hook opclass;
     } hook;
     union {
@@ -16,6 +17,7 @@ struct hook_entry {
         enum op op;
         hc_pred pred;
     } why;
+    void *data;
 };
 
 struct hook_state {
@@ -49,8 +51,8 @@ static struct hook_entry * _new_hook(struct hook_state *hs)
     return &hs->hooks[hs->hook_index++];
 }
 
-int hc_hook_install(struct sim_state *state, enum hook_when when,
-                    enum hook_type type, ...)
+int hc_hook_install(struct sim_state *state, void *userdata,
+                    enum hook_when when, enum hook_type type, ...)
 {
     _init_hook_state(state);
     struct hook_entry *he = _new_hook(state->hook_state);
@@ -58,6 +60,7 @@ int hc_hook_install(struct sim_state *state, enum hook_when when,
     va_start(va,type);
     he->type = type;
     he->when = when;
+    he->data = userdata;
 
     switch (type) {
         case HOOK_TYPE_INSTR: {
@@ -89,15 +92,51 @@ int hc_hook_install(struct sim_state *state, enum hook_when when,
     return 0;
 }
 
+static int _apply_hooks(struct hook_state *hs, enum hook_when when, struct sim_state *state, void *userdata)
+{
+    for (unsigned i = 0; i < hs->hook_index; i++) {
+        struct hook_entry *he = &hs->hooks[i];
+        enum op op = hc_curr_op(&state->hc_state);
+        enum opclass opclass = op2opclass[op];
+
+        if (!(he->when & when))
+            continue;
+
+        switch (he->type) {
+            case HOOK_TYPE_INSTR:
+                if (he->why.op == op)
+                    he->hook.op(state, op, userdata);
+                break;
+            case HOOK_TYPE_INSTR_CLASS:
+                if (he->why.opclass == opclass)
+                    he->hook.opclass(state, opclass, op, userdata);
+                break;
+            case HOOK_TYPE_PRED:
+                if (he->why.pred(&state->hc_state, userdata, op, (void(*)())he->hook.pred))
+                    he->hook.pred(state, op, userdata);
+            default:
+                return -1;
+        }
+    }
+
+    return 0;
+}
+
 // called by sim loop
 int hc_hook_pre_op(struct sim_state *state)
 {
-    return -1;
+    // Find all applicable hooks and run them
+    int rc = _apply_hooks(state->hook_state, HOOK_WHEN_BEFORE, state, NULL); /// @todo expose userdata
+
+    return rc;
 }
 
 int hc_hook_post_op(struct sim_state *state)
 {
-    return -1;
+    // Find all applicable hooks and run them
+    int rc = _apply_hooks(state->hook_state, HOOK_WHEN_AFTER, state, NULL); /// @todo expose userdata
+
+    return rc;
 }
 
 /* vi:set ts=4 sw=4 et: */

@@ -1,6 +1,6 @@
 START_TEST(test_add9)
 {
-    hc_state_t hc = {
+    struct hc_state hc = {
 		.mem = {
 			#include "add9.s19.genH"
 		},

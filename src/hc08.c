@@ -62,6 +62,26 @@ int hc_op_page(struct hc_state *st)
     return rc;
 }
 
+const struct opinfo* hc_curr_opinfo(struct hc_state *st)
+{
+    int page = hc_op_page(st);
+    assert(page < pages_size);
+    st->offset += pages[page].prebyte_cnt;
+    assert(st->offset < MAX_INSN_LEN);
+
+    uint16_t *pc = &st->regs.PC.word;
+
+    const struct opinfo *info = &opinfos[page][st->mem[*pc + st->offset]];
+
+    return info;
+}
+
+enum op hc_curr_op(struct hc_state *st)
+{
+    const struct opinfo *info = hc_curr_opinfo(st);
+    return info ? info->type : OP_INVALID;
+}
+
 int hc_do_op(struct hc_state *st)
 {
     int rc = 0;
@@ -73,7 +93,7 @@ int hc_do_op(struct hc_state *st)
 
     uint16_t *pc = &st->regs.PC.word;
 
-    const struct opinfo *info = &opinfos[page][st->mem[*pc + st->offset]];
+    const struct opinfo *info = hc_curr_opinfo(st);
     enum op op = info->type;
     st->offset++; // account of opcode byte, so offset now points to "args"
     assert(st->offset < MAX_INSN_LEN);

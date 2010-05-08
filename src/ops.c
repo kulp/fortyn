@@ -549,7 +549,10 @@ enum opclass op2opclass[] = {
 #undef OPCLASS_
 #undef OP_
 };
- 
+
+const struct opinfo* hc_curr_opinfo(struct hc_state *st);
+enum op hc_curr_op(struct hc_state *st);
+
 /* vi:set ts=4 sw=4 et: */
 /* vim:set syntax=c.doxygen: */
 

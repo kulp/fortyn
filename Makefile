@@ -8,7 +8,7 @@ CLEANFILES += $(UIS)
 vpath %.h src
 vpath %.c src
 
-override CFLAGS += -g -std=c99 -W -Wall -Wextra -pedantic-errors #-Werror -Wno-unused-parameter
+override CFLAGS += -g -std=c99 -W -Wall -Wextra -pedantic-errors -Wno-unused-parameter -Werror
 override CFLAGS += $(patsubst %,-D%,$(DEFINES))
 override CFLAGS += $(patsubst %,-I%,$(INCLUDE))
 
