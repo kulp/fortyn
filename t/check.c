@@ -31,6 +31,12 @@ Suite* basic_suite(void)
         suite_add_tcase(s, tc);
     }
 
+    {
+        TCase *tc = tcase_create("Hooks");
+        tcase_add_test(tc, test_hook_add9);
+        suite_add_tcase(s, tc);
+    }
+
     return s;
 }
 

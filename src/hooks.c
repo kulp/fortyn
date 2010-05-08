@@ -31,7 +31,10 @@ static int _init_hook_state(struct sim_state *state)
     if (state->hook_state)
         return -EALREADY;
 
-    state->hook_state = calloc(1, sizeof *state->hook_state);
+    size_t count = 16;
+    struct hook_state *hs = state->hook_state = calloc(count, sizeof *state->hook_state);
+    hs->hook_count = count;
+    hs->hook_index = 0;
 
     return 0;
 }
