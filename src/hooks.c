@@ -95,7 +95,8 @@ int hc_hook_install(struct sim_state *state, void *userdata,
     return 0;
 }
 
-static int _apply_hooks(struct hook_state *hs, enum hook_when when, struct sim_state *state, void *userdata)
+/// @todo find a way to find hooks more efficiently than linear search
+static int _apply_hooks(struct hook_state *hs, enum hook_when when, struct sim_state *state)
 {
     for (unsigned i = 0; i < hs->hook_index; i++) {
         struct hook_entry *he = &hs->hooks[i];
@@ -108,15 +109,15 @@ static int _apply_hooks(struct hook_state *hs, enum hook_when when, struct sim_s
         switch (he->type) {
             case HOOK_TYPE_INSTR:
                 if (he->why.op == op)
-                    he->hook.op(state, op, userdata);
+                    he->hook.op(state, op, he->data);
                 break;
             case HOOK_TYPE_INSTR_CLASS:
                 if (he->why.opclass == opclass)
-                    he->hook.opclass(state, opclass, op, userdata);
+                    he->hook.opclass(state, opclass, op, he->data);
                 break;
             case HOOK_TYPE_PRED:
-                if (he->why.pred(&state->hc_state, userdata, op, (void(*)())he->hook.pred))
-                    he->hook.pred(state, op, userdata);
+                if (he->why.pred(&state->hc_state, he->data, op, (void(*)())he->hook.pred))
+                    he->hook.pred(state, op, he->data);
             default:
                 return -1;
         }
@@ -129,7 +130,7 @@ static int _apply_hooks(struct hook_state *hs, enum hook_when when, struct sim_s
 int hc_hook_pre_op(struct sim_state *state)
 {
     // Find all applicable hooks and run them
-    int rc = _apply_hooks(state->hook_state, HOOK_WHEN_BEFORE, state, NULL); /// @todo expose userdata
+    int rc = _apply_hooks(state->hook_state, HOOK_WHEN_BEFORE, state);
 
     return rc;
 }
@@ -137,7 +138,7 @@ int hc_hook_pre_op(struct sim_state *state)
 int hc_hook_post_op(struct sim_state *state)
 {
     // Find all applicable hooks and run them
-    int rc = _apply_hooks(state->hook_state, HOOK_WHEN_AFTER, state, NULL); /// @todo expose userdata
+    int rc = _apply_hooks(state->hook_state, HOOK_WHEN_AFTER, state);
 
     return rc;
 }
