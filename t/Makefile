@@ -25,7 +25,7 @@ run: check
 	$(shell dirname $<)/$<
 
 vpath %.c ../src
-check: ops.o ops_impl.o sim.o hc08.o hooks.o
+check: ops.o ops_impl.o sim.o hc08.o hooks.o disasm.o
 
 ##############################################################################
 # Create includable files from .s assembly sources

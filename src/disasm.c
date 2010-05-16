@@ -1,12 +1,13 @@
 #include "disasm.h"
 
-int hc_disasm_instr(void *buf, size_t size, struct opinfo * const *info, size_t *dlen)
+int hc_disasm_instr(void *buf, size_t size, const struct opinfo **info,
+                    size_t *dlen, struct operand *op1, struct operand *op2)
 {
     /// @todo
     if (info)
-        *info = &opinfos[OP_INVALID];
+        *info = (const struct opinfo*)&opinfos[OP_INVALID];
 
-    return 0;
+    return -1;
 }
 
 /* vi:set ts=4 sw=4 et: */
